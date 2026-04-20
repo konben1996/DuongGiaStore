@@ -1049,7 +1049,7 @@ img {
 }
 
 .footer__grid--three {
-  grid-template-columns: 1.2fr 0.9fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
 }
 
 .footer__col {
@@ -1326,18 +1326,64 @@ img {
   align-items: start;
 }
 
+.product-modal__gallery {
+  display: grid;
+  gap: 14px;
+}
+
 .product-modal__visual {
-  min-height: 280px;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  min-height: 320px;
   border-radius: 26px;
   display: block;
   overflow: hidden;
   background: linear-gradient(180deg, #eef2ff, #f8fafc);
 }
 
+.product-modal__thumbs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.product-modal__thumb {
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--surface);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+  transition:
+    transform var(--transition),
+    border-color var(--transition),
+    box-shadow var(--transition),
+    background-color var(--theme-transition);
+}
+
+.product-modal__thumb:hover,
+.product-modal__thumb:focus-visible {
+  transform: translateY(-2px);
+  border-color: var(--primary);
+  box-shadow: 0 12px 28px rgba(225, 37, 27, 0.18);
+}
+
+.product-modal__thumb.is-active {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(225, 37, 27, 0.16);
+}
+
+.product-modal__thumb img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  display: block;
+}
+
 .product-modal__visual img {
   width: 100%;
   height: 100%;
-  min-height: 280px;
+  min-height: 320px;
   object-fit: cover;
   display: block;
 }
@@ -1663,11 +1709,12 @@ img {
   }
 
   .product-modal__visual {
-    min-height: 220px;
+    aspect-ratio: 1 / 1;
+    min-height: 240px;
   }
 
   .product-modal__visual img {
-    min-height: 220px;
+    min-height: 240px;
   }
 
   .product-card__title {
@@ -1870,6 +1917,12 @@ body[data-theme="dark"] .cart-item__thumb {
   background: linear-gradient(180deg, #1e293b, #0f172a);
 }
 
+body[data-theme="dark"] .product-modal__thumb {
+  background: var(--surface);
+  border-color: var(--border);
+  box-shadow: var(--shadow);
+}
+
 body[data-theme="dark"] .tab-btn {
   color: var(--text-soft);
 }
@@ -2010,6 +2063,12 @@ body[data-theme="dark"] .modal__overlay {
   body:not([data-theme]) .product-modal__visual,
   body:not([data-theme]) .cart-item__thumb {
     background: linear-gradient(180deg, #1e293b, #0f172a);
+  }
+
+  body:not([data-theme]) .product-modal__thumb {
+    background: var(--surface);
+    border-color: var(--border);
+    box-shadow: var(--shadow);
   }
 
   body:not([data-theme]) .tab-btn {

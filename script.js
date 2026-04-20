@@ -338,6 +338,88 @@ const defaultProductImage =
   "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80";
 const imagePlaceholder =
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'%3E%3C/svg%3E";
+const productGalleries = {
+  "pcap-apollo": [
+    "https://images.unsplash.com/photo-1587202372583-49330a15584d?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1547082299-de196ea013d6?auto=format&fit=crop&w=1200&q=80",
+  ],
+  "asus-rog-cetra-core": [
+    "https://images.unsplash.com/photo-1511467687858-23d96c32e4ae?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=1200&q=80",
+  ],
+  "asus-proart-17": [
+    "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=1200&q=80",
+  ],
+  "hp-omen-15": [
+    "https://images.unsplash.com/photo-1603481546579-65d935ba9cdd?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?auto=format&fit=crop&w=1200&q=80",
+  ],
+  "asus-tuf-h3": [
+    "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1511467687858-23d96c32e4ae?auto=format&fit=crop&w=1200&q=80",
+  ],
+  "pcap-styx": [
+    "https://images.unsplash.com/photo-1587202372616-b43abea06c2a?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1591488320449-011701bb6704?auto=format&fit=crop&w=1200&q=80",
+  ],
+  "acer-swift-7": [
+    "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1484788984921-03950022c9ef?auto=format&fit=crop&w=1200&q=80",
+  ],
+  "lg-gram-17": [
+    "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80",
+  ],
+  "asus-vivobook-15": [
+    "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1484788984921-03950022c9ef?auto=format&fit=crop&w=1200&q=80",
+  ],
+  "ikbc-cd108": [
+    "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=1200&q=80",
+  ],
+  "pcap-iris": [
+    "https://images.unsplash.com/photo-1587202372583-49330a15584d?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1547082299-de196ea013d6?auto=format&fit=crop&w=1200&q=80",
+  ],
+  "acer-predator-helios": [
+    "https://images.unsplash.com/photo-1603302576837-37561b2e2302?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?auto=format&fit=crop&w=1200&q=80",
+  ],
+  "msi-modern-15": [
+    "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1484788984921-03950022c9ef?auto=format&fit=crop&w=1200&q=80",
+  ],
+  "rog-zephyrus-m": [
+    "https://images.unsplash.com/photo-1603481546579-65d935ba9cdd?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?auto=format&fit=crop&w=1200&q=80",
+  ],
+  "dxracer-valkyrie": [
+    "https://images.unsplash.com/photo-1511467687858-23d96c32e4ae?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=1200&q=80",
+  ],
+  "asus-tuf-fx705": [
+    "https://images.unsplash.com/photo-1603481546579-65d935ba9cdd?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1603302576837-37561b2e2302?auto=format&fit=crop&w=1200&q=80",
+  ],
+  "pcap-poseidon": [
+    "https://images.unsplash.com/photo-1587202372583-49330a15584d?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1591488320449-011701bb6704?auto=format&fit=crop&w=1200&q=80",
+  ],
+  "pcap-jupiter": [
+    "https://images.unsplash.com/photo-1547082299-de196ea013d6?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1591488320449-011701bb6704?auto=format&fit=crop&w=1200&q=80",
+  ],
+  "asus-strix-ultra": [
+    "https://images.unsplash.com/photo-1587202372583-49330a15584d?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1547082299-de196ea013d6?auto=format&fit=crop&w=1200&q=80",
+  ],
+  "lg-gram-14": [
+    "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80",
+  ],
+};
 
 const state = {
   currentSlide: 0,
@@ -435,6 +517,15 @@ function findProductById(productId) {
 
 function getProductImage(product) {
   return product.image || defaultProductImage;
+}
+
+function getProductGallery(product) {
+  const extraImages = productGalleries[product.id] || [];
+
+  return [getProductImage(product), ...extraImages]
+    .filter(Boolean)
+    .filter((image, index, list) => list.indexOf(image) === index)
+    .slice(0, 4);
 }
 
 function getFilteredProducts(baseList = products) {
@@ -620,14 +711,43 @@ function openProductModal(productId) {
   const product = findProductById(productId);
   if (!product) return;
 
+  const gallery = getProductGallery(product);
+  const featuredImage = gallery[0];
+
   elements.productModalContent.innerHTML = `
-    <div class="product-modal__visual">
-      <img
-        src="${getProductImage(product)}"
-        alt="${product.name}"
-        loading="lazy"
-        referrerpolicy="no-referrer"
-      />
+    <div class="product-modal__gallery">
+      <div class="product-modal__visual">
+        <img
+          src="${featuredImage}"
+          alt="${product.name}"
+          loading="lazy"
+          decoding="async"
+          referrerpolicy="no-referrer"
+          id="productModalMainImage"
+        />
+      </div>
+      <div class="product-modal__thumbs">
+        ${gallery
+          .map(
+            (image, index) => `
+              <button
+                type="button"
+                class="product-modal__thumb ${index === 0 ? "is-active" : ""}"
+                data-gallery-image="${image}"
+                aria-label="Xem ảnh ${index + 1} của ${product.name}"
+              >
+                <img
+                  src="${image}"
+                  alt="${product.name} - ảnh ${index + 1}"
+                  loading="lazy"
+                  decoding="async"
+                  referrerpolicy="no-referrer"
+                />
+              </button>
+            `
+          )
+          .join("")}
+      </div>
     </div>
     <div class="product-modal__info">
       <span class="section-kicker">${product.label}</span>
@@ -806,6 +926,21 @@ function initEvents() {
     if (modalCloser) {
       const modal = document.getElementById(modalCloser.dataset.closeModal);
       if (modal) closeModal(modal);
+    }
+
+    const galleryThumb = event.target.closest("[data-gallery-image]");
+    if (galleryThumb) {
+      const mainImage = document.getElementById("productModalMainImage");
+      const nextImage = galleryThumb.dataset.galleryImage;
+
+      if (mainImage && nextImage) {
+        mainImage.src = nextImage;
+        document.querySelectorAll(".product-modal__thumb").forEach((thumb) => {
+          thumb.classList.toggle("is-active", thumb === galleryThumb);
+        });
+      }
+
+      return;
     }
 
     const anchor = event.target.closest('a[href^="#"]');
