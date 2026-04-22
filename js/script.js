@@ -1,0 +1,602 @@
+const productDataSources = Object.values(window.DuongGiaStoreProducts || {});
+const products = productDataSources.flatMap((source) => source.products || []);
+const productGalleries = productDataSources.reduce(
+  (acc, source) => Object.assign(acc, source.productGalleries || {}),
+  {}
+);
+
+const defaultProductImage =
+  "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80";
+const imagePlaceholder =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'%3E%3C/svg%3E";
+
+const state = {
+  currentSlide: 0,
+  currentTab: "bestSeller",
+  currentNewProductsTab: "newArrival",
+  currentPromoProductsTab: "discount",
+  currentCategory: "all",
+};
+
+const elements = {
+  body: document.body,
+  tabProductGrid: document.getElementById("tabProductGrid"),
+  productTabs: document.getElementById("productTabs"),
+  newProductsTabs: document.getElementById("newProductsTabs"),
+  promoProductsTabs: document.querySelector("#promo-products .tabs"),
+  categoryButtons: [...document.querySelectorAll("[data-category-filter]")],
+  laptopGrid: document.getElementById("laptopGrid"),
+  desktopGrid: document.getElementById("desktopGrid"),
+  gamingGrid: document.getElementById("gamingGrid"),
+  openMobileMenu: document.getElementById("openMobileMenu"),
+  mobileDrawer: document.getElementById("mobileDrawer"),
+  globalBackdrop: document.getElementById("globalBackdrop"),
+  productModal: document.getElementById("productModal"),
+  productModalContent: document.getElementById("productModalContent"),
+  toast: document.getElementById("toast"),
+  backToTop: document.getElementById("backToTop"),
+  themeToggle: document.getElementById("themeToggle"),
+  themeToggleMobile: document.getElementById("themeToggleMobile"),
+  heroSlides: [...document.querySelectorAll(".hero-slide")],
+  heroDots: document.getElementById("heroDots"),
+  prevSlide: document.getElementById("prevSlide"),
+  nextSlide: document.getElementById("nextSlide"),
+};
+
+let toastTimer = null;
+let sliderTimer = null;
+let imageObserver = null;
+
+function formatCurrency(value) {
+  return value.toLocaleString("vi-VN") + "₫";
+}
+
+function getSystemTheme() {
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+
+function updateThemeToggle(theme) {
+  const toggleButtons = [elements.themeToggle, elements.themeToggleMobile].filter(Boolean);
+
+  toggleButtons.forEach((button) => {
+    const icon = button.querySelector(".theme-toggle__icon");
+    const text = button.querySelector(".theme-toggle__text");
+
+    if (icon) icon.textContent = theme === "dark" ? "☀️" : "🌙";
+    if (text) text.textContent = theme === "dark" ? "Giao diện sáng" : "Giao diện tối";
+
+    button.setAttribute(
+      "aria-label",
+      theme === "dark" ? "Chuyển sang giao diện sáng" : "Chuyển sang giao diện tối"
+    );
+  });
+}
+
+function applyTheme(theme) {
+  elements.body.dataset.theme = theme;
+  updateThemeToggle(theme);
+}
+
+function initTheme() {
+  const savedTheme = localStorage.getItem("theme");
+  const initialTheme = savedTheme === "dark" || savedTheme === "light" ? savedTheme : getSystemTheme();
+
+  applyTheme(initialTheme);
+
+  const handleThemeToggle = () => {
+    const nextTheme = elements.body.dataset.theme === "dark" ? "light" : "dark";
+    localStorage.setItem("theme", nextTheme);
+    applyTheme(nextTheme);
+  };
+
+  elements.themeToggle?.addEventListener("click", handleThemeToggle);
+  elements.themeToggleMobile?.addEventListener("click", handleThemeToggle);
+
+  const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+  mediaQuery.addEventListener?.("change", (event) => {
+    const userSavedTheme = localStorage.getItem("theme");
+    if (userSavedTheme === "dark" || userSavedTheme === "light") return;
+    applyTheme(event.matches ? "dark" : "light");
+  });
+}
+
+function findProductById(productId) {
+  return products.find((product) => product.id === productId);
+}
+
+function getProductImage(product) {
+  return product.image || defaultProductImage;
+}
+
+function getProductGallery(product) {
+  const extraImages = productGalleries[product.id] || [];
+
+  return [getProductImage(product), ...extraImages]
+    .filter(Boolean)
+    .filter((image, index, list) => list.indexOf(image) === index)
+    .slice(0, 4);
+}
+
+function getFilteredProducts(baseList = products) {
+  return baseList.filter((product) => {
+    return state.currentCategory === "all" || product.category === state.currentCategory;
+  });
+}
+
+function getProductsByTag(tagName) {
+  return getFilteredProducts().filter((product) => product.tags.includes(tagName));
+}
+
+function getTabProducts() {
+  return getProductsByTag(state.currentTab);
+}
+
+function createProductCard(product) {
+  return `
+    <article class="product-card">
+      <div class="product-card__discount">-${product.discount}%</div>
+      <div class="product-card__media">
+        <img
+          src="${imagePlaceholder}"
+          data-src="${getProductImage(product)}"
+          alt="${product.name}"
+          loading="lazy"
+          decoding="async"
+          fetchpriority="low"
+          referrerpolicy="no-referrer"
+          class="lazy-product-image"
+        />
+      </div>
+      <span class="product-card__category">${product.label}</span>
+      <h3 class="product-card__title">${product.name}</h3>
+      <div class="product-card__pricing">
+        <span class="product-card__current">Liên Hệ</span>
+      </div>
+      <div class="product-card__actions">
+        <button type="button" class="btn-quick" data-action="quick-view" data-id="${product.id}">
+          Xem nhanh
+        </button>
+      </div>
+    </article>
+  `;
+}
+
+function initLazyImages() {
+  const lazyImages = [...document.querySelectorAll(".lazy-product-image[data-src]")];
+
+  if (!lazyImages.length) return;
+
+  if (!("IntersectionObserver" in window)) {
+    lazyImages.forEach((image) => {
+      image.src = image.dataset.src;
+      image.removeAttribute("data-src");
+    });
+    return;
+  }
+
+  if (imageObserver) imageObserver.disconnect();
+
+  imageObserver = new IntersectionObserver(
+    (entries, observer) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+
+        const image = entry.target;
+        const source = image.dataset.src;
+
+        if (source) {
+          image.src = source;
+          image.removeAttribute("data-src");
+        }
+
+        observer.unobserve(image);
+      });
+    },
+    {
+      rootMargin: "250px 0px",
+    }
+  );
+
+  lazyImages.forEach((image) => imageObserver.observe(image));
+}
+
+function renderGrid(target, list) {
+  if (!target) return;
+
+  if (!list.length) {
+    target.innerHTML = `
+      <div class="empty-state">
+        Không tìm thấy sản phẩm phù hợp. Hãy thử đổi từ khóa hoặc danh mục khác.
+      </div>
+    `;
+    return;
+  }
+
+  target.innerHTML = list.map(createProductCard).join("");
+  initLazyImages();
+}
+
+function renderTabProducts() {
+  renderGrid(elements.tabProductGrid, getTabProducts());
+}
+
+function renderCategorySections() {
+  const laptopProducts = getFilteredProducts().filter((product) =>
+    ["gaming-laptop", "workstation", "office-laptop"].includes(product.category)
+  );
+  const desktopProducts = getFilteredProducts().filter((product) => product.category === "gaming-pc");
+  const gamingProducts = getFilteredProducts().filter((product) =>
+    ["gaming-laptop", "workstation", "gaming-pc"].includes(product.category)
+  );
+
+  renderGrid(elements.laptopGrid, laptopProducts.slice(0, 10));
+  renderGrid(elements.desktopGrid, desktopProducts.slice(0, 10));
+  renderGrid(elements.gamingGrid, gamingProducts.slice(0, 10));
+}
+
+function renderNewProductsSection() {
+  const newProductsGrid = document.getElementById("newProductsGrid");
+  if (!newProductsGrid) return;
+
+  renderGrid(newProductsGrid, getProductsByTag(state.currentNewProductsTab).slice(0, 12));
+}
+
+function renderPromoProductsSection() {
+  const promoProductsGrid = document.getElementById("promoProductsGrid");
+  if (!promoProductsGrid) return;
+
+  renderGrid(promoProductsGrid, getProductsByTag(state.currentPromoProductsTab).slice(0, 12));
+}
+
+function showToast(message) {
+  elements.toast.setAttribute("role", "status");
+  elements.toast.setAttribute("aria-live", "polite");
+  elements.toast.textContent = message;
+  elements.toast.classList.add("is-visible");
+
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    elements.toast.classList.remove("is-visible");
+  }, 2400);
+}
+
+function setOverlayVisibility() {
+  const hasDrawerOpen = elements.mobileDrawer.classList.contains("is-open");
+  const hasModalOpen = elements.productModal.classList.contains("is-open");
+
+  elements.globalBackdrop.hidden = !hasDrawerOpen;
+  elements.body.classList.toggle("is-locked", hasDrawerOpen || hasModalOpen);
+}
+
+function openDrawer(drawer) {
+  drawer.classList.add("is-open");
+  drawer.setAttribute("aria-hidden", "false");
+  setOverlayVisibility();
+}
+
+function closeDrawer(drawer) {
+  drawer.classList.remove("is-open");
+  drawer.setAttribute("aria-hidden", "true");
+  setOverlayVisibility();
+}
+
+function closeAllDrawers() {
+  closeDrawer(elements.mobileDrawer);
+}
+
+function openModal(modal) {
+  modal.classList.add("is-open");
+  modal.setAttribute("aria-hidden", "false");
+  setOverlayVisibility();
+}
+
+function closeModal(modal) {
+  modal.classList.remove("is-open");
+  modal.setAttribute("aria-hidden", "true");
+  setOverlayVisibility();
+}
+
+function openProductModal(productId) {
+  const product = findProductById(productId);
+  if (!product) return;
+
+  const gallery = getProductGallery(product);
+  const featuredImage = gallery[0];
+
+  elements.productModalContent.innerHTML = `
+    <div class="product-modal__gallery">
+      <div class="product-modal__visual">
+        <img
+          src="${featuredImage}"
+          alt="${product.name}"
+          loading="lazy"
+          decoding="async"
+          referrerpolicy="no-referrer"
+          id="productModalMainImage"
+        />
+      </div>
+      <div class="product-modal__thumbs">
+        ${gallery
+          .map(
+            (image, index) => `
+              <button
+                type="button"
+                class="product-modal__thumb ${index === 0 ? "is-active" : ""}"
+                data-gallery-image="${image}"
+                aria-label="Xem ảnh ${index + 1} của ${product.name}"
+              >
+                <img
+                  src="${image}"
+                  alt="${product.name} - ảnh ${index + 1}"
+                  loading="lazy"
+                  decoding="async"
+                  referrerpolicy="no-referrer"
+                />
+              </button>
+            `
+          )
+          .join("")}
+      </div>
+    </div>
+    <div class="product-modal__info">
+      <span class="section-kicker">${product.label}</span>
+      <h3>${product.name}</h3>
+      <p>${product.summary}</p>
+      <div class="product-modal__price">Liên Hệ</div>
+      <div class="product-modal__meta">
+        <span><strong>Thương hiệu:</strong> ${product.brand}</span>
+        <span><strong>Tình trạng:</strong> ${product.stock}</span>
+        <span><strong>Ưu đãi:</strong> Giảm ${product.discount}% so với giá niêm yết</span>
+      </div>
+      <ul class="support-list">
+        ${product.specs.map((spec) => `<li>${spec}</li>`).join("")}
+      </ul>
+      <div class="hero-slide__actions">
+        <button type="button" class="btn btn--light" data-close-modal="productModal">
+          Đóng
+        </button>
+      </div>
+    </div>
+  `;
+
+  openModal(elements.productModal);
+}
+
+function activateTab(tabName) {
+  state.currentTab = tabName;
+  elements.productTabs?.querySelectorAll(".tab-btn").forEach((button) => {
+    button.classList.toggle("is-active", button.dataset.tab === tabName);
+  });
+  renderTabProducts();
+}
+
+function activateNewProductsTab(tabName) {
+  state.currentNewProductsTab = tabName;
+  elements.newProductsTabs?.querySelectorAll(".tab-btn").forEach((button) => {
+    button.classList.toggle("is-active", button.dataset.tab === tabName);
+  });
+  renderNewProductsSection();
+}
+
+function activatePromoProductsTab(tabName) {
+  state.currentPromoProductsTab = tabName;
+  elements.promoProductsTabs?.querySelectorAll(".tab-btn").forEach((button) => {
+    button.classList.toggle("is-active", button.dataset.tab === tabName);
+  });
+  renderPromoProductsSection();
+}
+
+function setCategory(category) {
+  state.currentCategory = category;
+  elements.categoryButtons.forEach((button) => {
+    button.classList.toggle("is-active", button.dataset.categoryFilter === category);
+  });
+
+  renderTabProducts();
+  renderCategorySections();
+  renderNewProductsSection();
+  renderPromoProductsSection();
+}
+
+function setSlide(index) {
+  const total = elements.heroSlides.length;
+  if (!total) return;
+
+  state.currentSlide = (index + total) % total;
+
+  elements.heroSlides.forEach((slide, slideIndex) => {
+    slide.classList.toggle("is-active", slideIndex === state.currentSlide);
+  });
+
+  [...elements.heroDots.querySelectorAll(".hero-dot")].forEach((dot, dotIndex) => {
+    dot.classList.toggle("is-active", dotIndex === state.currentSlide);
+  });
+}
+
+function buildHeroDots() {
+  if (!elements.heroSlides.length) return;
+
+  elements.heroDots.innerHTML = elements.heroSlides
+    .map(
+      (_, index) =>
+        `<button type="button" class="hero-dot ${index === 0 ? "is-active" : ""}" data-slide="${index}" aria-label="Đi tới slide ${index + 1}"></button>`
+    )
+    .join("");
+}
+
+function startAutoSlide() {
+  if (elements.heroSlides.length < 2) return;
+
+  stopAutoSlide();
+  sliderTimer = setInterval(() => {
+    setSlide(state.currentSlide + 1);
+  }, 4500);
+}
+
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) {
+    stopAutoSlide();
+  } else {
+    startAutoSlide();
+  }
+});
+
+function stopAutoSlide() {
+  if (sliderTimer) {
+    clearInterval(sliderTimer);
+    sliderTimer = null;
+  }
+}
+
+function handleSpecialNav(targetId, anchor) {
+  if (!targetId) return false;
+
+  const target = document.getElementById(targetId);
+  if (!target) return false;
+
+  const headerOffset = window.innerWidth <= 768 ? 96 : 128;
+  const targetTop = target.getBoundingClientRect().top + window.scrollY - headerOffset;
+
+  document.querySelectorAll(".drawer__nav a").forEach((link) => {
+    link.classList.toggle("is-active", link === anchor);
+  });
+
+  window.scrollTo({
+    top: Math.max(targetTop, 0),
+    behavior: "smooth",
+  });
+
+  return true;
+}
+
+function initEvents() {
+  elements.productTabs?.addEventListener("click", (event) => {
+    const button = event.target.closest(".tab-btn");
+    if (!button) return;
+    activateTab(button.dataset.tab);
+  });
+
+  elements.newProductsTabs?.addEventListener("click", (event) => {
+    const button = event.target.closest(".tab-btn");
+    if (!button) return;
+    activateNewProductsTab(button.dataset.tab);
+  });
+
+  elements.promoProductsTabs?.addEventListener("click", (event) => {
+    const button = event.target.closest(".tab-btn");
+    if (!button) return;
+    activatePromoProductsTab(button.dataset.tab);
+  });
+
+  elements.categoryButtons.forEach((button) => {
+    button.addEventListener("click", () => setCategory(button.dataset.categoryFilter));
+  });
+
+  elements.openMobileMenu?.addEventListener("click", () => openDrawer(elements.mobileDrawer));
+
+  elements.globalBackdrop?.addEventListener("click", closeAllDrawers);
+
+  document.querySelectorAll("[data-close-drawer]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const drawer = document.getElementById(button.dataset.closeDrawer);
+      if (drawer) closeDrawer(drawer);
+    });
+  });
+
+  document.querySelectorAll("[data-close-modal]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const modal = document.getElementById(button.dataset.closeModal);
+      if (modal) closeModal(modal);
+    });
+  });
+
+  document.addEventListener("click", (event) => {
+    const actionButton = event.target.closest("[data-action]");
+    if (actionButton) {
+      const { action, id } = actionButton.dataset;
+
+      if (action === "quick-view") {
+        openProductModal(id);
+        return;
+      }
+    }
+
+    const modalCloser = event.target.closest("[data-close-modal]");
+    if (modalCloser) {
+      const modal = document.getElementById(modalCloser.dataset.closeModal);
+      if (modal) closeModal(modal);
+    }
+
+    const galleryThumb = event.target.closest("[data-gallery-image]");
+    if (galleryThumb) {
+      const mainImage = document.getElementById("productModalMainImage");
+      const nextImage = galleryThumb.dataset.galleryImage;
+
+      if (mainImage && nextImage) {
+        mainImage.src = nextImage;
+        document.querySelectorAll(".product-modal__thumb").forEach((thumb) => {
+          thumb.classList.toggle("is-active", thumb === galleryThumb);
+        });
+      }
+
+      return;
+    }
+
+    const anchor = event.target.closest('a[href^="#"]');
+    if (anchor) {
+      const targetId = anchor.getAttribute("href").slice(1);
+      if (handleSpecialNav(targetId, anchor)) {
+        event.preventDefault();
+        closeDrawer(elements.mobileDrawer);
+      }
+    }
+  });
+
+  elements.prevSlide?.addEventListener("click", () => {
+    setSlide(state.currentSlide - 1);
+    startAutoSlide();
+  });
+
+  elements.nextSlide?.addEventListener("click", () => {
+    setSlide(state.currentSlide + 1);
+    startAutoSlide();
+  });
+
+  elements.heroDots?.addEventListener("click", (event) => {
+    const dot = event.target.closest(".hero-dot");
+    if (!dot) return;
+    setSlide(Number(dot.dataset.slide));
+    startAutoSlide();
+  });
+
+
+
+  elements.backToTop?.addEventListener("click", () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+
+  window.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      closeAllDrawers();
+      closeModal(elements.productModal);
+    }
+  });
+
+  window.addEventListener("scroll", () => {
+    const show = window.scrollY > 480;
+    elements.backToTop.style.opacity = show ? "1" : "0.65";
+  });
+}
+
+function init() {
+  initTheme();
+  buildHeroDots();
+  renderTabProducts();
+  renderCategorySections();
+  renderNewProductsSection();
+  renderPromoProductsSection();
+  initEvents();
+  startAutoSlide();
+}
+
+init();
