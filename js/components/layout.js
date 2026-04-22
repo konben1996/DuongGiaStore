@@ -26,10 +26,7 @@
         </button>
 
         <div class="header__actions">
-          <a class="support-pill" href="tel:">
-            <span>Hotline</span>
-            <strong></strong>
-          </a>
+          <a class="login-btn" >Đăng nhập</a>
           <button type="button" class="theme-toggle" id="themeToggle" aria-label="Chuyển giao diện sáng tối">
             <span class="theme-toggle__icon" aria-hidden="true">🌙</span>
           </button>
