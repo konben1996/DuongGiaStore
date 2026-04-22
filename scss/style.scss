@@ -1505,6 +1505,7 @@ img {
     transform var(--transition),
     box-shadow var(--transition),
     filter var(--transition);
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
 
   &:hover,
   &:focus-visible {
@@ -1519,11 +1520,6 @@ img {
 
   &--phone {
     background: linear-gradient(135deg, #16a34a, #166534);
-  }
-
-  &--top,
-  .icon-btn {
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
   }
 }
 
@@ -1728,6 +1724,10 @@ img {
 
   .header__main > #openMobileMenu {
     order: 1;
+    width: 46px;
+    height: 46px;
+    min-height: 46px;
+    font-size: 20px;
   }
 
   .header__main > .logo {
@@ -1933,22 +1933,34 @@ body[data-theme="dark"] {
     border-bottom-color: rgba(51, 65, 85, 0.85);
   }
 
-  .navbar__inner a,
-  .section-link,
-  .footer__col h3,
-  .logo__text strong,
-  .support-pill strong,
-  .icon-card__text strong,
-  .product-modal__meta,
-  .modal__close,
-  .product-card__actions .btn-quick,
-  .theme-toggle {
-    color: var(--text);
-  }
+    .navbar__inner a,
+    .section-link,
+    .footer__col h3,
+    .logo__text strong,
+    .support-pill strong,
+    .icon-card__text strong,
+    .product-modal__meta,
+    .modal__close,
+    .product-card__actions .btn-quick,
+    .theme-toggle {
+      color: var(--text);
+    }
 
-  .topbar {
-    background: #020617;
-  }
+    .theme-toggle:hover,
+    .theme-toggle:focus-visible,
+    .theme-toggle--mobile:hover,
+    .theme-toggle--mobile:focus-visible {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark)) !important;
+      border-color: transparent !important;
+      color: #fff !important;
+      box-shadow: 0 14px 32px rgba(225, 37, 27, 0.32) !important;
+      transform: translateY(-2px) scale(1.03) !important;
+      filter: brightness(1.05) !important;
+    }
+
+    .topbar {
+      background: #020617;
+    }
 
   .searchbar,
   .support-pill,
@@ -2005,12 +2017,27 @@ body[data-theme="dark"] {
   }
 
   .tab-btn {
+    background: var(--surface);
+    border-color: var(--border);
     color: var(--text-soft);
+    box-shadow: var(--shadow);
 
     &.is-active,
-    &:hover {
+    &:hover,
+    &:focus-visible {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
       color: #fff;
+      border-color: transparent;
+      box-shadow: 0 14px 32px rgba(225, 37, 27, 0.28);
     }
+  }
+
+  .product-card__actions .btn-quick:hover,
+  .product-card__actions .btn-quick:focus-visible {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: #fff;
+    border-color: transparent;
+    box-shadow: 0 14px 32px rgba(225, 37, 27, 0.28);
   }
 
   .product-card__actions .btn-cart,
@@ -2092,9 +2119,20 @@ body[data-theme="dark"] {
     .icon-card__text strong,
     .product-modal__meta,
     .modal__close,
-    .product-card__actions .btn-quick,
-    .theme-toggle {
+    .product-card__actions .btn-quick {
       color: var(--text);
+    }
+
+    .theme-toggle:hover,
+    .theme-toggle:focus-visible,
+    .theme-toggle--mobile:hover,
+    .theme-toggle--mobile:focus-visible {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark)) !important;
+      border-color: transparent !important;
+      color: #fff !important;
+      box-shadow: 0 14px 32px rgba(225, 37, 27, 0.32) !important;
+      transform: translateY(-2px) scale(1.03) !important;
+      filter: brightness(1.05) !important;
     }
 
     .topbar {
@@ -2156,12 +2194,27 @@ body[data-theme="dark"] {
     }
 
     .tab-btn {
+      background: var(--surface);
+      border-color: var(--border);
       color: var(--text-soft);
+      box-shadow: var(--shadow);
 
       &.is-active,
-      &:hover {
+      &:hover,
+      &:focus-visible {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
         color: #fff;
+        border-color: transparent;
+        box-shadow: 0 14px 32px rgba(225, 37, 27, 0.28);
       }
+    }
+
+    .product-card__actions .btn-quick:hover,
+    .product-card__actions .btn-quick:focus-visible {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 14px 32px rgba(225, 37, 27, 0.28);
     }
 
     .product-card__actions .btn-cart,

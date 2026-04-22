@@ -1286,6 +1286,7 @@ img {
   font-size: 22px;
   box-shadow: 0 16px 35px rgba(15, 23, 42, 0.18);
   transition: transform var(--transition), box-shadow var(--transition), filter var(--transition);
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
 }
 .floating-btn:hover, .floating-btn:focus-visible,
 .icon-btn:hover,
@@ -1301,12 +1302,6 @@ img {
 .floating-btn--phone,
 .icon-btn--phone {
   background: linear-gradient(135deg, #16a34a, #166534);
-}
-.floating-btn--top,
-.floating-btn .icon-btn,
-.icon-btn--top,
-.icon-btn .icon-btn {
-  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
 }
 
 .mobile-only {
@@ -1474,6 +1469,10 @@ img {
   }
   .header__main > #openMobileMenu {
     order: 1;
+    width: 46px;
+    height: 46px;
+    min-height: 46px;
+    font-size: 20px;
   }
   .header__main > .logo {
     order: 2;
@@ -1654,6 +1653,17 @@ body[data-theme=dark] .product-card__actions .btn-quick,
 body[data-theme=dark] .theme-toggle {
   color: var(--text);
 }
+body[data-theme=dark] .theme-toggle:hover,
+body[data-theme=dark] .theme-toggle:focus-visible,
+body[data-theme=dark] .theme-toggle--mobile:hover,
+body[data-theme=dark] .theme-toggle--mobile:focus-visible {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark)) !important;
+  border-color: transparent !important;
+  color: #fff !important;
+  box-shadow: 0 14px 32px rgba(225, 37, 27, 0.32) !important;
+  transform: translateY(-2px) scale(1.03) !important;
+  filter: brightness(1.05) !important;
+}
 body[data-theme=dark] .topbar {
   background: #020617;
 }
@@ -1706,10 +1716,23 @@ body[data-theme=dark] .product-modal__thumb {
   box-shadow: var(--shadow);
 }
 body[data-theme=dark] .tab-btn {
+  background: var(--surface);
+  border-color: var(--border);
   color: var(--text-soft);
+  box-shadow: var(--shadow);
 }
-body[data-theme=dark] .tab-btn.is-active, body[data-theme=dark] .tab-btn:hover {
+body[data-theme=dark] .tab-btn.is-active, body[data-theme=dark] .tab-btn:hover, body[data-theme=dark] .tab-btn:focus-visible {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
   color: #fff;
+  border-color: transparent;
+  box-shadow: 0 14px 32px rgba(225, 37, 27, 0.28);
+}
+body[data-theme=dark] .product-card__actions .btn-quick:hover,
+body[data-theme=dark] .product-card__actions .btn-quick:focus-visible {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 14px 32px rgba(225, 37, 27, 0.28);
 }
 body[data-theme=dark] .product-card__actions .btn-cart,
 body[data-theme=dark] .btn--primary,
@@ -1781,9 +1804,19 @@ body[data-theme=dark] .modal__overlay {
   body:not([data-theme]) .icon-card__text strong,
   body:not([data-theme]) .product-modal__meta,
   body:not([data-theme]) .modal__close,
-  body:not([data-theme]) .product-card__actions .btn-quick,
-  body:not([data-theme]) .theme-toggle {
+  body:not([data-theme]) .product-card__actions .btn-quick {
     color: var(--text);
+  }
+  body:not([data-theme]) .theme-toggle:hover,
+  body:not([data-theme]) .theme-toggle:focus-visible,
+  body:not([data-theme]) .theme-toggle--mobile:hover,
+  body:not([data-theme]) .theme-toggle--mobile:focus-visible {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark)) !important;
+    border-color: transparent !important;
+    color: #fff !important;
+    box-shadow: 0 14px 32px rgba(225, 37, 27, 0.32) !important;
+    transform: translateY(-2px) scale(1.03) !important;
+    filter: brightness(1.05) !important;
   }
   body:not([data-theme]) .topbar {
     background: #020617;
@@ -1837,10 +1870,23 @@ body[data-theme=dark] .modal__overlay {
     box-shadow: var(--shadow);
   }
   body:not([data-theme]) .tab-btn {
+    background: var(--surface);
+    border-color: var(--border);
     color: var(--text-soft);
+    box-shadow: var(--shadow);
   }
-  body:not([data-theme]) .tab-btn.is-active, body:not([data-theme]) .tab-btn:hover {
+  body:not([data-theme]) .tab-btn.is-active, body:not([data-theme]) .tab-btn:hover, body:not([data-theme]) .tab-btn:focus-visible {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
     color: #fff;
+    border-color: transparent;
+    box-shadow: 0 14px 32px rgba(225, 37, 27, 0.28);
+  }
+  body:not([data-theme]) .product-card__actions .btn-quick:hover,
+  body:not([data-theme]) .product-card__actions .btn-quick:focus-visible {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: #fff;
+    border-color: transparent;
+    box-shadow: 0 14px 32px rgba(225, 37, 27, 0.28);
   }
   body:not([data-theme]) .product-card__actions .btn-cart,
   body:not([data-theme]) .btn--primary,
