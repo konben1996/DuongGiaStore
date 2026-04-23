@@ -429,10 +429,10 @@ img {
   bottom: -40px;
 }
 .hero-slide__visual--red {
-  background: linear-gradient(rgba(239, 68, 68, 0.18), rgba(127, 29, 29, 0.18)), url("./assets/products/gaming-pc.jpg") center/cover no-repeat;
+  background: url("./assets/products/gaming-pc.jpg") center/cover no-repeat;
 }
 .hero-slide__visual--blue {
-  background: linear-gradient(rgba(37, 99, 235, 0.18), rgba(30, 58, 138, 0.18)), url("./assets/products/gaming-laptop.jpg") center/cover no-repeat;
+  background: url("./assets/products/gaming-laptop.jpg") center/cover no-repeat;
 }
 .hero-slide__visual--dark {
   background: linear-gradient(135deg, #111827, #374151);
