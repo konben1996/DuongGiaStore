@@ -31,6 +31,7 @@ function normalizeUser(user) {
     id: user.id,
     email: user.email,
     name: user.name,
+    phone: user.phone || null,
     role: user.role || 'user',
     created_at: user.created_at || new Date().toISOString(),
   };
@@ -83,7 +84,7 @@ app.get('/api/health', async (req, res) => {
 
 app.post('/api/auth/register', async (req, res) => {
   try {
-    const { email, password, name } = req.body;
+    const { email, password, name, phone } = req.body;
 
     if (!email || !password || !name) {
       return res.status(400).json({ message: 'Thiếu email, mật khẩu hoặc tên' });
@@ -104,8 +105,8 @@ app.post('/api/auth/register', async (req, res) => {
 
     if (dbCheck.ok) {
       const [result] = await pool.query(
-        'INSERT INTO users (email, password_hash, name, role) VALUES (?, ?, ?, ?)',
-        [email, passwordHash, name, 'user']
+        'INSERT INTO users (email, password_hash, name, phone, role) VALUES (?, ?, ?, ?, ?)',
+        [email, passwordHash, name, phone || null, 'user']
       );
 
       return res.status(201).json({
@@ -114,6 +115,7 @@ app.post('/api/auth/register', async (req, res) => {
           id: result.insertId,
           email,
           name,
+          phone: phone || null,
           role: 'user',
         },
       });
@@ -144,7 +146,7 @@ app.post('/api/auth/register', async (req, res) => {
 app.get('/api/auth/me', authMiddleware, async (req, res) => {
   try {
     const dbCheck = await getDbOrFallbackRows(
-      'SELECT id, email, name, role, created_at FROM users WHERE id = ? LIMIT 1',
+      'SELECT id, email, name, phone, role, created_at FROM users WHERE id = ? LIMIT 1',
       [req.user.id]
     );
 
@@ -175,7 +177,7 @@ app.post('/api/auth/login', async (req, res) => {
     }
 
     const dbCheck = await getDbOrFallbackRows(
-      'SELECT id, email, password_hash, name, role FROM users WHERE email = ? LIMIT 1',
+      'SELECT id, email, password_hash, name, phone, role FROM users WHERE email = ? LIMIT 1',
       [email]
     );
 
@@ -198,7 +200,7 @@ app.post('/api/auth/login', async (req, res) => {
     }
 
     const token = jwt.sign(
-      { id: user.id, email: user.email, name: user.name, role: user.role },
+      { id: user.id, email: user.email, name: user.name, phone: user.phone || null, role: user.role },
       JWT_SECRET,
       { expiresIn: '1d' }
     );

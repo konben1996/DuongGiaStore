@@ -56,6 +56,7 @@
           <a href="index.html#laptops">Máy tính xách tay</a>
           <a href="index.html#desktop">Máy tính để bàn</a>
           <a href="index.html#gaming">Laptop game & đồ họa</a>
+          <a href="account.html" id="accountMenuLink" hidden>Thông tin tài khoản</a>
         </div>
       </nav>
     </header>
@@ -172,17 +173,34 @@
     if (target) target.innerHTML = loginModalHTML + registerModalHTML;
   }
 
+  function syncAccountMenuLink() {
+    const accountMenuLink = document.getElementById("accountMenuLink");
+    const storedUser =
+      JSON.parse(localStorage.getItem("authUser") || "null") ||
+      JSON.parse(sessionStorage.getItem("authUser") || "null");
+    const storedToken = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+
+    if (accountMenuLink) {
+      const isLoggedIn = Boolean(storedToken || storedUser);
+      accountMenuLink.hidden = !isLoggedIn;
+    }
+  }
+
   function renderLayout() {
     renderHeader();
     renderFooter();
     renderLoginModal();
+    syncAccountMenuLink();
   }
+
+  window.addEventListener("storage", syncAccountMenuLink);
 
   window.DuongGiaStoreLayout = {
     renderHeader,
     renderFooter,
     renderLoginModal,
     renderLayout,
+    syncAccountMenuLink,
   };
 
   renderLayout();
