@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Đăng ký tài khoản - Đường Gia Phát</title>
+  <meta
+    name="description"
+    content="Tạo tài khoản Đường Gia Phát để đăng nhập, theo dõi đơn hàng và mua sắm nhanh hơn."
+  />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="site-shell">
+    <div id="siteHeader"></div>
+
+    <main class="auth-page auth-page--compact">
+      <section class="auth-page__hero">
+        <div class="container auth-page__grid auth-page__grid--center">
+          <div class="auth-page__card auth-page__card--wide">
+            <div class="auth-panel">
+              <div class="auth-panel__header">
+                <span class="section-kicker">Đăng ký</span>
+                <h1>Tạo tài khoản mới</h1>
+                <p>Điền thông tin để tạo tài khoản và mua hàng nhanh hơn.</p>
+              </div>
+
+              <form class="auth-form" id="registerPageForm" action="/api/auth/register" method="post" novalidate onsubmit="return false;">
+                <label>
+                  <span>Họ tên</span>
+                  <input
+                    type="text"
+                    name="name"
+                    id="registerPageName"
+                    autocomplete="name"
+                    placeholder="Nhập họ tên"
+                  />
+                </label>
+
+                <label>
+                  <span>Email</span>
+                  <input
+                    type="email"
+                    name="email"
+                    id="registerPageEmail"
+                    autocomplete="email"
+                    placeholder="Nhập email"
+                  />
+                </label>
+
+                <label>
+                  <span>Mật khẩu</span>
+                  <input
+                    type="password"
+                    name="password"
+                    id="registerPagePassword"
+                    autocomplete="new-password"
+                    placeholder="Nhập mật khẩu"
+                  />
+                </label>
+
+                <button type="submit" class="btn btn--primary btn--block">Đăng ký</button>
+                <a href="login.html" class="btn btn--light btn--block">Đã có tài khoản? Đăng nhập</a>
+                <p class="auth-status" id="registerPageStatus" aria-live="polite"></p>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div id="siteFooter"></div>
+  </div>
+
+  <script src="js/components/layout.js"></script>
+  <script src="js/register-page.js"></script>
+</body>
+</html>

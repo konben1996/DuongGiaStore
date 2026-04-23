@@ -35,11 +35,21 @@ const elements = {
   productModalContent: document.getElementById("productModalContent"),
   loginModal: document.getElementById("loginModal"),
   openLoginModal: document.getElementById("openLoginModal"),
+  openRegisterModal: document.getElementById("openRegisterModal"),
+  userChip: document.getElementById("userChip"),
+  userChipName: document.getElementById("userChipName"),
+  logoutBtn: document.getElementById("logoutBtn"),
   loginForm: document.getElementById("loginForm"),
   loginStatus: document.getElementById("loginStatus"),
   loginIdentity: document.getElementById("loginIdentity"),
   loginPassword: document.getElementById("loginPassword"),
   rememberLogin: document.getElementById("rememberLogin"),
+  registerModal: document.getElementById("registerModal"),
+  registerForm: document.getElementById("registerForm"),
+  registerStatus: document.getElementById("registerStatus"),
+  registerName: document.getElementById("registerName"),
+  registerEmail: document.getElementById("registerEmail"),
+  registerPassword: document.getElementById("registerPassword"),
   toast: document.getElementById("toast"),
   backToTop: document.getElementById("backToTop"),
   themeToggle: document.getElementById("themeToggle"),
@@ -298,9 +308,149 @@ function openLoginModal() {
   openModal(elements.loginModal);
   clearTimeout(toastTimer);
 
+  if (elements.loginStatus) elements.loginStatus.textContent = "";
+
   window.setTimeout(() => {
     elements.loginIdentity?.focus();
   }, 0);
+}
+
+function getStoredAuth() {
+  const storedUser =
+    JSON.parse(localStorage.getItem("authUser") || "null") ||
+    JSON.parse(sessionStorage.getItem("authUser") || "null");
+  const storedToken = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+
+  return { user: storedUser, token: storedToken };
+}
+
+function clearAuthStorage() {
+  localStorage.removeItem("authToken");
+  localStorage.removeItem("authUser");
+  sessionStorage.removeItem("authToken");
+  sessionStorage.removeItem("authUser");
+}
+
+async function fetchCurrentUser(token) {
+  const response = await fetch("http://localhost:3001/api/auth/me", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Không thể xác thực phiên đăng nhập");
+  }
+
+  return data.user;
+}
+
+function openRegisterModal() {
+  if (!elements.registerModal) return;
+
+  openModal(elements.registerModal);
+
+  if (elements.registerStatus) elements.registerStatus.textContent = "";
+
+  window.setTimeout(() => {
+    elements.registerName?.focus();
+  }, 0);
+}
+
+function closeRegisterModal() {
+  if (!elements.registerModal) return;
+
+  closeModal(elements.registerModal);
+  if (elements.registerStatus) elements.registerStatus.textContent = "";
+  if (elements.registerForm) elements.registerForm.reset();
+}
+
+function updateAuthUI(user) {
+  const isLoggedIn = Boolean(user);
+
+  if (elements.userChip) {
+    elements.userChip.hidden = !isLoggedIn;
+  }
+
+  if (elements.userChipName) {
+    elements.userChipName.textContent = user?.name || "Khách";
+  }
+
+  if (elements.openLoginModal) {
+    elements.openLoginModal.style.display = isLoggedIn ? "none" : "";
+    elements.openLoginModal.hidden = isLoggedIn;
+  }
+
+  document.body.dataset.userRole = user?.role || "guest";
+  document.querySelectorAll("[data-requires-role]").forEach((element) => {
+    const requiredRole = element.dataset.requiresRole;
+    const canSee = isLoggedIn && (requiredRole === "any" || requiredRole === user?.role);
+    element.hidden = !canSee;
+  });
+}
+
+function handleLogout() {
+  clearAuthStorage();
+  updateAuthUI(null);
+  showToast("Đã đăng xuất");
+}
+
+async function handleRegisterSubmit(event) {
+  event.preventDefault();
+
+  const name = elements.registerName?.value.trim() || "";
+  const email = elements.registerEmail?.value.trim() || "";
+  const password = elements.registerPassword?.value || "";
+
+  if (!name || !email || !password) {
+    if (elements.registerStatus) {
+      elements.registerStatus.textContent = "Vui lòng nhập đầy đủ họ tên, email và mật khẩu.";
+    }
+    return;
+  }
+
+  if (elements.registerStatus) {
+    elements.registerStatus.textContent = "Đang tạo tài khoản...";
+  }
+
+  try {
+    const response = await fetch("http://localhost:3001/api/auth/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name,
+        email,
+        password,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Đăng ký thất bại");
+    }
+
+    if (elements.registerStatus) {
+      elements.registerStatus.textContent = "Đăng ký thành công, bạn có thể đăng nhập ngay.";
+    }
+
+    showToast("Đăng ký thành công");
+    closeRegisterModal();
+    openLoginModal();
+
+    if (elements.loginIdentity) {
+      elements.loginIdentity.value = email;
+    }
+  } catch (error) {
+    if (elements.registerStatus) {
+      elements.registerStatus.textContent = error.message || "Không thể đăng ký. Vui lòng thử lại.";
+    }
+    showToast("Đăng ký thất bại");
+  }
 }
 
 function closeLoginModal() {
@@ -311,7 +461,7 @@ function closeLoginModal() {
   if (elements.loginForm) elements.loginForm.reset();
 }
 
-function handleLoginSubmit(event) {
+async function handleLoginSubmit(event) {
   event.preventDefault();
 
   const identity = elements.loginIdentity?.value.trim() || "";
@@ -326,13 +476,45 @@ function handleLoginSubmit(event) {
   }
 
   if (elements.loginStatus) {
-    elements.loginStatus.textContent = remember
-      ? "Đăng nhập thử thành công, tài khoản sẽ được ghi nhớ trên thiết bị này."
-      : "Đăng nhập thử thành công.";
+    elements.loginStatus.textContent = "Đang đăng nhập...";
   }
 
-  showToast("Đăng nhập thử thành công");
-  closeLoginModal();
+  try {
+    const response = await fetch("http://localhost:3001/api/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: identity,
+        password,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Đăng nhập thất bại");
+    }
+
+    const storage = remember ? localStorage : sessionStorage;
+    storage.setItem("authToken", data.token);
+    storage.setItem("authUser", JSON.stringify(data.user));
+
+    updateAuthUI(data.user);
+
+    if (elements.loginStatus) {
+      elements.loginStatus.textContent = `Xin chào ${data.user.name}, đăng nhập thành công.`;
+    }
+
+    showToast("Đăng nhập thành công");
+    closeLoginModal();
+  } catch (error) {
+    if (elements.loginStatus) {
+      elements.loginStatus.textContent = error.message || "Không thể đăng nhập. Vui lòng thử lại.";
+    }
+    showToast("Đăng nhập thất bại");
+  }
 }
 
 function openModal(modal) {
@@ -545,6 +727,11 @@ function initEvents() {
 
   elements.openMobileMenu?.addEventListener("click", () => openDrawer(elements.mobileDrawer));
   elements.openLoginModal?.addEventListener("click", openLoginModal);
+  elements.openRegisterModal?.addEventListener("click", (event) => {
+    event.preventDefault();
+    openRegisterModal();
+  });
+  elements.logoutBtn?.addEventListener("click", handleLogout);
 
   elements.globalBackdrop?.addEventListener("click", () => {
     closeAllDrawers();
@@ -552,9 +739,13 @@ function initEvents() {
   });
 
   elements.loginForm?.addEventListener("submit", handleLoginSubmit);
+  elements.registerForm?.addEventListener("submit", handleRegisterSubmit);
 
   document.querySelectorAll('[data-close-modal="loginModal"]').forEach((button) => {
     button.addEventListener("click", closeLoginModal);
+  });
+  document.querySelectorAll('[data-close-modal="registerModal"]').forEach((button) => {
+    button.addEventListener("click", closeRegisterModal);
   });
 
   document.querySelectorAll("[data-close-drawer]").forEach((button) => {
@@ -641,6 +832,7 @@ function initEvents() {
       closeAllDrawers();
       closeModal(elements.productModal);
       closeLoginModal();
+      closeRegisterModal();
     }
   });
 
@@ -650,7 +842,7 @@ function initEvents() {
   });
 }
 
-function init() {
+async function init() {
   initTheme();
   buildHeroDots();
   renderTabProducts();
@@ -658,6 +850,29 @@ function init() {
   renderNewProductsSection();
   renderPromoProductsSection();
   initEvents();
+
+  const auth = getStoredAuth();
+
+  if (auth.token) {
+    try {
+      const currentUser = await fetchCurrentUser(auth.token);
+      updateAuthUI(currentUser);
+      localStorage.setItem("authUser", JSON.stringify(currentUser));
+      sessionStorage.setItem("authUser", JSON.stringify(currentUser));
+    } catch (error) {
+      clearAuthStorage();
+      updateAuthUI(null);
+    }
+  } else {
+    updateAuthUI(auth.user);
+  }
+
+  if (document.body.dataset.userRole === "admin") {
+    document.querySelectorAll("[data-admin-only]").forEach((element) => {
+      element.hidden = false;
+    });
+  }
+
   startAutoSlide();
 }
 

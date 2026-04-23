@@ -1,7 +1,5 @@
 (() => {
   const headerHTML = `
-    
-
     <header class="header">
       <div class="container header__main">
         <button class="icon-btn mobile-only" id="openMobileMenu" aria-label="Mở menu">
@@ -26,14 +24,23 @@
         </button>
 
         <div class="header__actions">
-          <button
-            type="button"
+          <div class="user-chip" id="userChip" hidden>
+            <span class="user-chip__label">Xin chào</span>
+            <strong class="user-chip__name" id="userChipName">
+              Khách <span class="user-chip__arrow" aria-hidden="true">⌄</span>
+            </strong>
+            <button type="button" class="login-btn login-btn--logout" id="logoutBtn">
+              Đăng xuất
+            </button>
+          </div>
+          <a
+            href="login.html"
             class="login-btn"
             id="openLoginModal"
-            aria-label="Mở popup đăng nhập"
+            aria-label="Đi tới trang đăng nhập"
           >
             Đăng nhập
-          </button>
+          </a>
           <button type="button" class="theme-toggle" id="themeToggle" aria-label="Chuyển giao diện sáng tối">
             <span class="theme-toggle__icon" aria-hidden="true">🌙</span>
           </button>
@@ -42,13 +49,13 @@
 
       <nav class="navbar">
         <div class="container navbar__inner">
-          <a href="#">Trang chủ</a>
-          <a href="#featured">Sản phẩm bán chạy</a>
-          <a href="#new-products">Sản phẩm mới</a>
-          <a href="#promo-products">Khuyến mãi</a>
-          <a href="#laptops">Máy tính xách tay</a>
-          <a href="#desktop">Máy tính để bàn</a>
-          <a href="#gaming">Laptop game & đồ họa</a>
+          <a href="index.html#home">Trang chủ</a>
+          <a href="index.html#featured">Sản phẩm bán chạy</a>
+          <a href="index.html#new-products">Sản phẩm mới</a>
+          <a href="index.html#promo-products">Khuyến mãi</a>
+          <a href="index.html#laptops">Máy tính xách tay</a>
+          <a href="index.html#desktop">Máy tính để bàn</a>
+          <a href="index.html#gaming">Laptop game & đồ họa</a>
         </div>
       </nav>
     </header>
@@ -97,8 +104,8 @@
           </div>
           <form class="auth-form" id="loginForm">
             <label>
-              <span>Email hoặc số điện thoại</span>
-              <input type="text" name="identity" id="loginIdentity" autocomplete="username" placeholder="Nhập email hoặc số điện thoại" />
+              <span>Email</span>
+              <input type="email" name="email" id="loginIdentity" autocomplete="username" placeholder="Nhập email" />
             </label>
             <label>
               <span>Mật khẩu</span>
@@ -111,9 +118,42 @@
             <button type="submit" class="btn btn--primary btn--block">Đăng nhập</button>
             <button type="button" class="btn btn--light btn--block" data-close-modal="loginModal">Đóng</button>
             <p class="auth-link">
-              Chưa có tài khoản? <a href="#" class="auth-link__action">Đăng ký tài khoản</a>
+              Chưa có tài khoản? <a href="register.html" class="auth-link__action" id="openRegisterModal">Đăng ký tài khoản</a>
             </p>
             <p class="auth-status" id="loginStatus" aria-live="polite"></p>
+          </form>
+        </div>
+      </div>
+    </div>
+  `;
+
+  const registerModalHTML = `
+    <div class="modal" id="registerModal" aria-hidden="true">
+      <div class="modal__overlay" data-close-modal="registerModal"></div>
+      <div class="modal__content modal__content--auth" role="dialog" aria-modal="true" aria-labelledby="registerModalTitle">
+        <button type="button" class="modal__close" data-close-modal="registerModal" aria-label="Đóng popup đăng ký">✕</button>
+        <div class="auth-panel">
+          <div class="auth-panel__header">
+            <span class="section-kicker">Đăng ký</span>
+            <h3 id="registerModalTitle">Tạo tài khoản mới</h3>
+            <p>Tạo tài khoản để mua hàng nhanh hơn và lưu thông tin cá nhân.</p>
+          </div>
+          <form class="auth-form" id="registerForm">
+            <label>
+              <span>Họ tên</span>
+              <input type="text" name="name" id="registerName" autocomplete="name" placeholder="Nhập họ tên" />
+            </label>
+            <label>
+              <span>Email</span>
+              <input type="email" name="email" id="registerEmail" autocomplete="email" placeholder="Nhập email" />
+            </label>
+            <label>
+              <span>Mật khẩu</span>
+              <input type="password" name="password" id="registerPassword" autocomplete="new-password" placeholder="Nhập mật khẩu" />
+            </label>
+            <button type="submit" class="btn btn--primary btn--block">Đăng ký</button>
+            <button type="button" class="btn btn--light btn--block" data-close-modal="registerModal">Đóng</button>
+            <p class="auth-status" id="registerStatus" aria-live="polite"></p>
           </form>
         </div>
       </div>
@@ -129,7 +169,7 @@
   }
 
   function renderLoginModal(target = document.getElementById("siteModal")) {
-    if (target) target.innerHTML = loginModalHTML;
+    if (target) target.innerHTML = loginModalHTML + registerModalHTML;
   }
 
   function renderLayout() {
@@ -141,6 +181,7 @@
   window.DuongGiaStoreLayout = {
     renderHeader,
     renderFooter,
+    renderLoginModal,
     renderLayout,
   };
 
