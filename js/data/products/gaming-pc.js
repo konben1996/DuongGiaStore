@@ -10,7 +10,7 @@ window.DuongGiaStoreProducts["gaming-pc"] = {
       category: "gaming-pc",
       label: "PC Gaming",
       image:
-        "assets/products/gaming-pc.jpg",
+        "assets/images/gaming-pc/pcap-apollo/pcap-apollo.jpg",
       stock: "Còn hàng",
       brand: "ASUS",
       summary:
@@ -32,7 +32,7 @@ window.DuongGiaStoreProducts["gaming-pc"] = {
       category: "gaming-pc",
       label: "PC Đa nhiệm",
       image:
-        "assets/products/gaming-pc.jpg",
+        "assets/images/gaming-pc/pcap-styx/pcap-styx.jpg",
       stock: "Còn hàng",
       brand: "MSI",
       summary:
@@ -49,7 +49,7 @@ window.DuongGiaStoreProducts["gaming-pc"] = {
       category: "gaming-pc",
       label: "PC Đa nhiệm",
       image:
-        "assets/products/gaming-pc.jpg",
+        "assets/images/gaming-pc/pcap-iris/pcap-iris.jpg",
       stock: "Còn hàng",
       brand: "INTEL",
       summary:
@@ -66,7 +66,7 @@ window.DuongGiaStoreProducts["gaming-pc"] = {
       category: "gaming-pc",
       label: "PC Gaming",
       image:
-        "assets/products/gaming-pc.jpg",
+        "assets/images/gaming-pc/pcap-poseidon/pcap-poseidon.jpg",
       stock: "Sẵn cấu hình",
       brand: "NVIDIA",
       summary: "PC gaming hiệu năng cao cho AAA, streaming, thiết kế 2D/3D và nâng cấp linh hoạt.",
@@ -82,7 +82,7 @@ window.DuongGiaStoreProducts["gaming-pc"] = {
       category: "gaming-pc",
       label: "PC Gaming",
       image:
-        "assets/products/gaming-pc.jpg",
+        "assets/images/gaming-pc/pcap-jupiter/pcap-jupiter.jpg",
       stock: "Còn hàng",
       brand: "GIGABYTE",
       summary: "Dòng PC dành cho game thủ cần cấu hình mạnh, ổn định và nâng cấp lâu dài.",
@@ -98,7 +98,7 @@ window.DuongGiaStoreProducts["gaming-pc"] = {
       category: "gaming-pc",
       label: "PC Gaming",
       image:
-        "assets/products/gaming-pc.jpg",
+        "assets/images/gaming-pc/asus-strix-ultra/asus-strix-ultra.jpg",
       stock: "Sẵn cấu hình",
       brand: "ASUS",
       summary: "Bộ máy gaming cao cấp định hướng eSports và AAA với ngoại hình nổi bật.",
@@ -108,28 +108,28 @@ window.DuongGiaStoreProducts["gaming-pc"] = {
   ],
   productGalleries: {
     "pcap-apollo": [
-      "assets/products/gaming-pc.jpg",
-      "assets/products/gaming-pc.jpg",
+      "assets/images/gaming-pc/pcap-apollo/pcap-apollo.jpg",
+      "assets/images/gaming-pc/pcap-apollo/pcap-apollo.jpg",
     ],
     "pcap-styx": [
-      "assets/products/gaming-pc.jpg",
-      "assets/products/gaming-pc.jpg",
+      "assets/images/gaming-pc/pcap-styx/pcap-styx.jpg",
+      "assets/images/gaming-pc/pcap-styx/pcap-styx.jpg",
     ],
     "pcap-iris": [
-      "assets/products/gaming-pc.jpg",
-      "assets/products/gaming-pc.jpg",
+      "assets/images/gaming-pc/pcap-iris/pcap-iris.jpg",
+      "assets/images/gaming-pc/pcap-iris/pcap-iris.jpg",
     ],
     "pcap-poseidon": [
-      "assets/products/gaming-pc.jpg",
-      "assets/products/gaming-pc.jpg",
+      "assets/images/gaming-pc/pcap-poseidon/pcap-poseidon.jpg",
+      "assets/images/gaming-pc/pcap-poseidon/pcap-poseidon.jpg",
     ],
     "pcap-jupiter": [
-      "assets/products/gaming-pc.jpg",
-      "assets/products/gaming-pc.jpg",
+      "assets/images/gaming-pc/pcap-jupiter/pcap-jupiter.jpg",
+      "assets/images/gaming-pc/pcap-jupiter/pcap-jupiter.jpg",
     ],
     "asus-strix-ultra": [
-      "assets/products/gaming-pc.jpg",
-      "assets/products/gaming-pc.jpg",
+      "assets/images/gaming-pc/asus-strix-ultra/asus-strix-ultra.jpg",
+      "assets/images/gaming-pc/asus-strix-ultra/asus-strix-ultra.jpg",
     ],
   },
 };

@@ -10,7 +10,7 @@ window.DuongGiaStoreProducts["gaming-laptop"] = {
       category: "gaming-laptop",
       label: "Laptop Gaming",
       image:
-        "assets/products/gaming-laptop.jpg",
+        "assets/images/gaming-laptop/hp-omen-15/hp-omen-15.jpg",
       stock: "Còn hàng",
       brand: "HP",
       summary:
@@ -27,7 +27,7 @@ window.DuongGiaStoreProducts["gaming-laptop"] = {
       category: "gaming-laptop",
       label: "Laptop Gaming",
       image:
-        "assets/products/gaming-laptop.jpg",
+        "assets/images/gaming-laptop/acer-predator-helios/acer-predator-helios.jpg",
       stock: "Sẵn hàng",
       brand: "ACER",
       summary:
@@ -44,7 +44,7 @@ window.DuongGiaStoreProducts["gaming-laptop"] = {
       category: "gaming-laptop",
       label: "Laptop Gaming",
       image:
-        "assets/products/gaming-laptop.jpg",
+        "assets/images/gaming-laptop/rog-zephyrus-m/rog-zephyrus-m.jpg",
       stock: "Sẵn hàng",
       brand: "ASUS",
       summary:
@@ -61,7 +61,7 @@ window.DuongGiaStoreProducts["gaming-laptop"] = {
       category: "gaming-laptop",
       label: "Laptop Gaming",
       image:
-        "assets/products/gaming-laptop.jpg",
+        "assets/images/gaming-laptop/asus-tuf-fx705/asus-tuf-fx705.jpg",
       stock: "Còn hàng",
       brand: "ASUS",
       summary: "Laptop gaming màn lớn, bền bỉ theo chuẩn TUF, phù hợp chiến game và đồ họa.",
@@ -71,20 +71,20 @@ window.DuongGiaStoreProducts["gaming-laptop"] = {
   ],
   productGalleries: {
     "hp-omen-15": [
-      "assets/products/gaming-laptop.jpg",
-      "assets/products/gaming-laptop.jpg",
+      "assets/images/gaming-laptop/hp-omen-15/hp-omen-15.jpg",
+      "assets/images/gaming-laptop/hp-omen-15/hp-omen-15.jpg",
     ],
     "acer-predator-helios": [
-      "assets/products/gaming-laptop.jpg",
-      "assets/products/gaming-laptop.jpg",
+      "assets/images/gaming-laptop/acer-predator-helios/acer-predator-helios.jpg",
+      "assets/images/gaming-laptop/acer-predator-helios/acer-predator-helios.jpg",
     ],
     "rog-zephyrus-m": [
-      "assets/products/gaming-laptop.jpg",
-      "assets/products/gaming-laptop.jpg",
+      "assets/images/gaming-laptop/rog-zephyrus-m/rog-zephyrus-m.jpg",
+      "assets/images/gaming-laptop/rog-zephyrus-m/rog-zephyrus-m.jpg",
     ],
     "asus-tuf-fx705": [
-      "assets/products/gaming-laptop.jpg",
-      "assets/products/gaming-laptop.jpg",
+      "assets/images/gaming-laptop/asus-tuf-fx705/asus-tuf-fx705.jpg",
+      "assets/images/gaming-laptop/asus-tuf-fx705/asus-tuf-fx705.jpg",
     ],
   },
 };

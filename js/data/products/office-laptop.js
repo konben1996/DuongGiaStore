@@ -10,7 +10,7 @@ window.DuongGiaStoreProducts["office-laptop"] = {
       category: "office-laptop",
       label: "Laptop Văn Phòng",
       image:
-        "assets/products/office-laptop.jpg",
+        "assets/images/office-laptop/acer-swift-7/acer-swift-7.jpg",
       stock: "Sẵn hàng",
       brand: "ACER",
       summary: "Laptop siêu mỏng nhẹ, sang trọng, phù hợp doanh nhân và công việc di chuyển nhiều.",
@@ -26,7 +26,7 @@ window.DuongGiaStoreProducts["office-laptop"] = {
       category: "office-laptop",
       label: "Laptop Văn Phòng",
       image:
-        "assets/products/office-laptop.jpg",
+        "assets/images/office-laptop/lg-gram-17/lg-gram-17.jpg",
       stock: "Còn hàng",
       brand: "LG",
       summary:
@@ -43,7 +43,7 @@ window.DuongGiaStoreProducts["office-laptop"] = {
       category: "office-laptop",
       label: "Laptop Văn Phòng",
       image:
-        "assets/products/office-laptop.jpg",
+        "assets/images/office-laptop/asus-vivobook-15/asus-vivobook-15.jpg",
       stock: "Còn hàng",
       brand: "ASUS",
       summary: "Laptop văn phòng phổ thông, cân bằng giữa hiệu năng, màn hình và mức giá.",
@@ -59,7 +59,7 @@ window.DuongGiaStoreProducts["office-laptop"] = {
       category: "office-laptop",
       label: "Laptop Văn Phòng",
       image:
-        "assets/products/office-laptop.jpg",
+        "assets/images/office-laptop/msi-modern-15/msi-modern-15.jpg",
       stock: "Còn hàng",
       brand: "MSI",
       summary:
@@ -76,7 +76,7 @@ window.DuongGiaStoreProducts["office-laptop"] = {
       category: "office-laptop",
       label: "Laptop Văn Phòng",
       image:
-        "assets/products/office-laptop.jpg",
+        "assets/images/office-laptop/lg-gram-14/lg-gram-14.jpg",
       stock: "Còn hàng",
       brand: "LG",
       summary: "Laptop gọn nhẹ cho doanh nhân, người dùng cần pin dài và tính di động cao.",
@@ -86,24 +86,24 @@ window.DuongGiaStoreProducts["office-laptop"] = {
   ],
   productGalleries: {
     "acer-swift-7": [
-      "assets/products/office-laptop.jpg",
-      "assets/products/office-laptop.jpg",
+      "assets/images/office-laptop/acer-swift-7/acer-swift-7.jpg",
+      "assets/images/office-laptop/acer-swift-7/acer-swift-7.jpg",
     ],
     "lg-gram-17": [
-      "assets/products/office-laptop.jpg",
-      "assets/products/office-laptop.jpg",
+      "assets/images/office-laptop/lg-gram-17/lg-gram-17.jpg",
+      "assets/images/office-laptop/lg-gram-17/lg-gram-17.jpg",
     ],
     "asus-vivobook-15": [
-      "assets/products/office-laptop.jpg",
-      "assets/products/office-laptop.jpg",
+      "assets/images/office-laptop/asus-vivobook-15/asus-vivobook-15.jpg",
+      "assets/images/office-laptop/asus-vivobook-15/asus-vivobook-15.jpg",
     ],
     "msi-modern-15": [
-      "assets/products/office-laptop.jpg",
-      "assets/products/office-laptop.jpg",
+      "assets/images/office-laptop/msi-modern-15/msi-modern-15.jpg",
+      "assets/images/office-laptop/msi-modern-15/msi-modern-15.jpg",
     ],
     "lg-gram-14": [
-      "assets/products/office-laptop.jpg",
-      "assets/products/office-laptop.jpg",
+      "assets/images/office-laptop/lg-gram-14/lg-gram-14.jpg",
+      "assets/images/office-laptop/lg-gram-14/lg-gram-14.jpg",
     ],
   },
 };

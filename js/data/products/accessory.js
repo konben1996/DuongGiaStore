@@ -10,7 +10,7 @@ window.DuongGiaStoreProducts["accessory"] = {
       category: "accessory",
       label: "Phụ kiện",
       image:
-        "assets/products/accessory.jpg",
+        "assets/images/accessory/asus-rog-cetra-core/asus-rog-cetra-core.jpg",
       stock: "Còn hàng",
       brand: "ASUS",
       summary: "Tai nghe in-ear gaming với âm thanh chi tiết, đeo êm và mic thoại rõ ràng.",
@@ -26,7 +26,7 @@ window.DuongGiaStoreProducts["accessory"] = {
       category: "accessory",
       label: "Phụ kiện",
       image:
-        "assets/products/accessory.jpg",
+        "assets/images/accessory/asus-tuf-h3/asus-tuf-h3.jpg",
       stock: "Còn hàng",
       brand: "ASUS",
       summary: "Tai nghe gaming chụp tai chắc chắn, âm bass tốt và mic đàm thoại rõ.",
@@ -42,7 +42,7 @@ window.DuongGiaStoreProducts["accessory"] = {
       category: "accessory",
       label: "Phụ kiện",
       image:
-        "assets/products/accessory.jpg",
+        "assets/images/accessory/ikbc-cd108/ikbc-cd108.jpg",
       stock: "Còn hàng",
       brand: "IKBC",
       summary: "Bàn phím cơ gõ sướng, bền bỉ, phù hợp game thủ và người dùng văn phòng thích tactile.",
@@ -58,7 +58,7 @@ window.DuongGiaStoreProducts["accessory"] = {
       category: "accessory",
       label: "Ghế Gaming",
       image:
-        "assets/products/accessory.jpg",
+        "assets/images/accessory/dxracer-valkyrie/dxracer-valkyrie.jpg",
       stock: "Còn hàng",
       brand: "DXRACER",
       summary: "Ghế gaming đệm êm, tựa lưng tốt, ngồi lâu thoải mái cho game thủ và streamer.",
@@ -68,20 +68,20 @@ window.DuongGiaStoreProducts["accessory"] = {
   ],
   productGalleries: {
     "asus-rog-cetra-core": [
-      "assets/products/accessory.jpg",
-      "assets/products/accessory.jpg",
+      "assets/images/accessory/asus-rog-cetra-core/asus-rog-cetra-core.jpg",
+      "assets/images/accessory/asus-rog-cetra-core/asus-rog-cetra-core.jpg",
     ],
     "asus-tuf-h3": [
-      "assets/products/accessory.jpg",
-      "assets/products/accessory.jpg",
+      "assets/images/accessory/asus-tuf-h3/asus-tuf-h3.jpg",
+      "assets/images/accessory/asus-tuf-h3/asus-tuf-h3.jpg",
     ],
     "ikbc-cd108": [
-      "assets/products/accessory.jpg",
-      "assets/products/accessory.jpg",
+      "assets/images/accessory/ikbc-cd108/ikbc-cd108.jpg",
+      "assets/images/accessory/ikbc-cd108/ikbc-cd108.jpg",
     ],
     "dxracer-valkyrie": [
-      "assets/products/accessory.jpg",
-      "assets/products/accessory.jpg",
+      "assets/images/accessory/dxracer-valkyrie/dxracer-valkyrie.jpg",
+      "assets/images/accessory/dxracer-valkyrie/dxracer-valkyrie.jpg",
     ],
   },
 };
