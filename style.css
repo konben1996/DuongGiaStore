@@ -295,6 +295,99 @@ img {
   width: 100%;
 }
 
+.account-popover {
+  position: fixed;
+  top: 150px;
+  right: 24px;
+  z-index: 120;
+  width: min(100% - 32px, 360px);
+}
+
+.account-popover__backdrop {
+  position: fixed;
+  inset: 0;
+  background: transparent;
+}
+
+.account-popover__panel {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid rgba(229, 231, 235, 0.85);
+  border-radius: 22px;
+  padding: 18px;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18);
+  backdrop-filter: blur(12px);
+}
+
+.account-popover__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.account-popover__label {
+  display: inline-block;
+  margin-bottom: 4px;
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.account-popover__header strong {
+  display: block;
+  font-size: 18px;
+  line-height: 1.35;
+}
+
+.account-popover__close {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--text-soft);
+  flex-shrink: 0;
+}
+
+.account-popover__body {
+  display: grid;
+  gap: 10px;
+  padding: 14px 0 16px;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.account-popover__body p {
+  margin: 0;
+  display: grid;
+  gap: 4px;
+  line-height: 1.5;
+  color: var(--text-soft);
+}
+
+.account-popover__body span {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.account-popover__body strong {
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+  word-break: break-word;
+}
+
+.account-popover__actions {
+  display: grid;
+  gap: 10px;
+  padding-top: 16px;
+}
+
 .hero {
   padding: 26px 0 12px;
 }
@@ -1519,6 +1612,12 @@ img {
   .site-shell {
     padding-top: 130px;
   }
+
+  .account-popover {
+    top: 126px;
+    right: 10px;
+    width: calc(100vw - 20px);
+  }
   .auth-page--compact {
     padding-top: 12px;
   }
@@ -1870,6 +1969,12 @@ body[data-theme=dark] .modal__overlay {
   background: rgba(2, 6, 23, 0.7);
 }
 
+body[data-theme=dark] .account-popover__panel {
+  background: var(--surface);
+  border-color: var(--border);
+  box-shadow: var(--shadow);
+}
+
 @media (prefers-color-scheme: dark) {
   body:not([data-theme]) {
     --bg: #0b1220;
@@ -2022,6 +2127,12 @@ body[data-theme=dark] .modal__overlay {
   body:not([data-theme]) .backdrop,
   body:not([data-theme]) .modal__overlay {
     background: rgba(2, 6, 23, 0.7);
+  }
+
+  body:not([data-theme]) .account-popover__panel {
+    background: var(--surface);
+    border-color: var(--border);
+    box-shadow: var(--shadow);
   }
 }
 

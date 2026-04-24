@@ -56,9 +56,30 @@
           <a href="index.html#laptops">Máy tính xách tay</a>
           <a href="index.html#desktop">Máy tính để bàn</a>
           <a href="index.html#gaming">Laptop game & đồ họa</a>
-          <a href="account.html" id="accountMenuLink" hidden>Thông tin tài khoản</a>
+          <a href="#" id="accountMenuLink" hidden>Thông tin tài khoản</a>
         </div>
       </nav>
+      <div class="account-popover" id="accountPopover" hidden>
+        <div class="account-popover__backdrop" data-close-account-popover="true"></div>
+        <div class="account-popover__panel" role="dialog" aria-modal="true" aria-label="Thông tin tài khoản">
+          <div class="account-popover__header">
+            <div>
+              <span class="account-popover__label">Tài khoản</span>
+              <strong id="accountPopoverName">Khách hàng</strong>
+            </div>
+            <button type="button" class="account-popover__close" data-close-account-popover="true" aria-label="Đóng">✕</button>
+          </div>
+          <div class="account-popover__body">
+            <p><span>Email:</span> <strong id="accountPopoverEmail">---</strong></p>
+            <p><span>Số điện thoại:</span> <strong id="accountPopoverPhone">---</strong></p>
+            <p><span>Tài khoản:</span> <strong id="accountPopoverUsername">---</strong></p>
+          </div>
+          <div class="account-popover__actions">
+            <a href="account.html" class="btn btn--primary btn--block">Xem chi tiết</a>
+            <button type="button" class="btn btn--light btn--block" id="accountPopoverLogout">Đăng xuất</button>
+          </div>
+        </div>
+      </div>
     </header>
   `;
 
@@ -173,34 +194,102 @@
     if (target) target.innerHTML = loginModalHTML + registerModalHTML;
   }
 
-  function syncAccountMenuLink() {
-    const accountMenuLink = document.getElementById("accountMenuLink");
-    const storedUser =
+  function getStoredAuthUser() {
+    return (
       JSON.parse(localStorage.getItem("authUser") || "null") ||
-      JSON.parse(sessionStorage.getItem("authUser") || "null");
+      JSON.parse(sessionStorage.getItem("authUser") || "null")
+    );
+  }
+
+  function syncAccountPopover() {
+    const accountMenuLink = document.getElementById("accountMenuLink");
+    const accountPopover = document.getElementById("accountPopover");
+    const accountPopoverName = document.getElementById("accountPopoverName");
+    const accountPopoverEmail = document.getElementById("accountPopoverEmail");
+    const accountPopoverPhone = document.getElementById("accountPopoverPhone");
+    const accountPopoverUsername = document.getElementById("accountPopoverUsername");
+    const storedUser = getStoredAuthUser();
     const storedToken = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+    const isLoggedIn = Boolean(storedToken || storedUser);
 
     if (accountMenuLink) {
-      const isLoggedIn = Boolean(storedToken || storedUser);
       accountMenuLink.hidden = !isLoggedIn;
     }
+
+    if (accountPopover) {
+      accountPopover.hidden = true;
+    }
+
+    if (isLoggedIn && storedUser) {
+      if (accountPopoverName) accountPopoverName.textContent = storedUser.name || "Khách hàng";
+      if (accountPopoverEmail) accountPopoverEmail.textContent = storedUser.email || "---";
+      if (accountPopoverPhone) accountPopoverPhone.textContent = storedUser.phone || "---";
+      if (accountPopoverUsername) {
+        accountPopoverUsername.textContent =
+          storedUser.username || (storedUser.email ? storedUser.email.split("@")[0] : "---");
+      }
+    }
+  }
+
+  function openAccountPopover() {
+    const accountPopover = document.getElementById("accountPopover");
+    if (accountPopover) accountPopover.hidden = false;
+  }
+
+  function closeAccountPopover() {
+    const accountPopover = document.getElementById("accountPopover");
+    if (accountPopover) accountPopover.hidden = true;
   }
 
   function renderLayout() {
     renderHeader();
     renderFooter();
     renderLoginModal();
-    syncAccountMenuLink();
+    syncAccountPopover();
   }
 
-  window.addEventListener("storage", syncAccountMenuLink);
+  document.addEventListener("click", (event) => {
+    const accountMenuLink = event.target.closest("#accountMenuLink");
+    if (accountMenuLink) {
+      event.preventDefault();
+      const storedToken = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+      const storedUser = getStoredAuthUser();
+      if (storedToken || storedUser) {
+        const accountPopover = document.getElementById("accountPopover");
+        if (accountPopover && accountPopover.hidden) {
+          openAccountPopover();
+        } else {
+          closeAccountPopover();
+        }
+      }
+      return;
+    }
+
+    if (event.target.closest("[data-close-account-popover='true']")) {
+      closeAccountPopover();
+      return;
+    }
+
+    const logoutBtn = event.target.closest("#accountPopoverLogout");
+    if (logoutBtn) {
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("authUser");
+      sessionStorage.removeItem("authToken");
+      sessionStorage.removeItem("authUser");
+      closeAccountPopover();
+      syncAccountPopover();
+      window.location.reload();
+    }
+  });
+
+  window.addEventListener("storage", syncAccountPopover);
 
   window.DuongGiaStoreLayout = {
     renderHeader,
     renderFooter,
     renderLoginModal,
     renderLayout,
-    syncAccountMenuLink,
+    syncAccountPopover,
   };
 
   renderLayout();
