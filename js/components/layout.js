@@ -56,6 +56,7 @@
           <a href="index.html#laptops">Máy tính xách tay</a>
           <a href="index.html#desktop">Máy tính để bàn</a>
           <a href="index.html#gaming">Laptop game & đồ họa</a>
+          <a href="admin.html" data-requires-role="admin" hidden>Admin Panel</a>
           <a href="account.html" id="accountMenuLink" hidden>Thông tin tài khoản</a>
         </div>
       </nav>
@@ -72,6 +73,7 @@
           <a href="index.html#laptops">Máy tính xách tay</a>
           <a href="index.html#desktop">Máy tính để bàn</a>
           <a href="index.html#gaming">Laptop game & đồ họa</a>
+          <a href="admin.html" data-requires-role="admin" hidden>Admin Panel</a>
           <a href="account.html" id="accountMenuLinkMobile" hidden onclick="window.DuongGiaStoreLayout && window.DuongGiaStoreLayout.navigateToAccount && window.DuongGiaStoreLayout.navigateToAccount(event)">Thông tin tài khoản</a>
         </nav>
       </div>
@@ -205,12 +207,26 @@
   function renderHeader(target = document.getElementById("siteHeader")) {
     if (!target) return;
     const isAdminPage = document.body.classList.contains("admin-shell");
+    const storedUser = getStoredAuthUser();
+    const storedToken = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+    const isAdminUser = Boolean(storedToken && storedUser && storedUser.role === "admin");
+    const adminLinkHTML = isAdminUser ? '<a href="admin.html">Admin Panel</a>' : "";
+
     target.innerHTML = isAdminPage
       ? headerHTML.replace(
           /<nav class="navbar">[\s\S]*?<\/nav>/,
           ""
         )
-      : headerHTML;
+      : headerHTML.replace(
+          '<a href="admin.html" data-requires-role="admin" hidden>Admin Panel</a>',
+          isAdminUser
+            ? '<a href="admin.html" data-requires-role="admin">Admin Panel</a>'
+            : ""
+        );
+
+    target.querySelectorAll('[data-requires-role="admin"]').forEach((element) => {
+      element.hidden = !isAdminUser;
+    });
   }
 
   function renderFooter(target = document.getElementById("siteFooter")) {

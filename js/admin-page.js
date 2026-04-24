@@ -705,6 +705,10 @@ function bindEvents() {
     button.addEventListener("click", () => closeModal(elements.adminProductModal));
   });
 
+  document.querySelectorAll("[data-close-modal='adminOrderModal']").forEach((button) => {
+    button.addEventListener("click", () => closeModal(elements.adminOrderModal));
+  });
+
   document.addEventListener("click", async (event) => {
     const actionButton = event.target.closest("[data-admin-action]");
     if (!actionButton) return;
