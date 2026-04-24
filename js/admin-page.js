@@ -43,6 +43,16 @@ const elements = {
   adminProductStatus: document.getElementById("adminProductStatus"),
   adminProductsTable: document.getElementById("adminProductsTable"),
   adminUsersTable: document.getElementById("adminUsersTable"),
+  adminOrderModal: document.getElementById("adminOrderModal"),
+  adminOrderForm: document.getElementById("adminOrderForm"),
+  adminOrderCode: document.getElementById("adminOrderCode"),
+  adminOrderCustomer: document.getElementById("adminOrderCustomer"),
+  adminOrderProducts: document.getElementById("adminOrderProducts"),
+  adminOrderTotal: document.getElementById("adminOrderTotal"),
+  adminOrderStatus: document.getElementById("adminOrderStatus"),
+  adminOrderStatusText: document.getElementById("adminOrderStatusText"),
+  openAddOrderForm: document.getElementById("openAddOrderForm"),
+  orderSearch: document.getElementById("orderSearch"),
   productSearch: document.getElementById("productSearch"),
   productCategoryFilter: document.getElementById("productCategoryFilter"),
   globalBackdrop: document.getElementById("globalBackdrop"),
@@ -300,10 +310,13 @@ function renderOrdersTable() {
   const table = document.getElementById("adminOrdersTable");
   if (!table) return;
 
-  if (!state.orders.length) {
+  const search = (elements.orderSearch?.value || "").trim().toLowerCase();
+  const rows = state.orders.filter((order) => !search || String(order.code || "").toLowerCase().includes(search));
+
+  if (!rows.length) {
     table.innerHTML = `
       <tr>
-        <td colspan="5" class="admin-table__empty">Chưa có dữ liệu đơn hàng.</td>
+        <td colspan="7" class="admin-table__empty">Không tìm thấy đơn hàng phù hợp.</td>
       </tr>
     `;
     return;
@@ -316,19 +329,44 @@ function renderOrdersTable() {
     cancelled: "Đã huỷ",
   };
 
-  table.innerHTML = state.orders
+  table.innerHTML = rows
     .map(
       (order) => `
         <tr>
           <td>${order.code || "---"}</td>
           <td>${order.customer || "---"}</td>
+          <td>${order.products || "---"}</td>
           <td>${formatCurrency(order.total)}</td>
           <td>${statusLabel[order.status] || order.status || "---"}</td>
           <td>${order.created_at || order.createdAt || "---"}</td>
+          <td>
+            <button type="button" class="btn btn--light" data-admin-action="edit-order" data-id="${order.id}">
+              Sửa
+            </button>
+          </td>
         </tr>
       `
     )
     .join("");
+}
+
+function renderOrderProductOptions(selectedValue = "") {
+  if (!elements.adminOrderProducts) return;
+
+  const options = state.products
+    .map(
+      (product) => `<option value="${product.name}">${product.name} (${categoryLabel(product.category)})</option>`
+    )
+    .join("");
+
+  elements.adminOrderProducts.innerHTML = `
+    <option value="">-- Chọn sản phẩm từ MySQL --</option>
+    ${options}
+  `;
+
+  if (selectedValue) {
+    elements.adminOrderProducts.value = selectedValue;
+  }
 }
 
 function updateSummary() {
@@ -414,6 +452,7 @@ async function loadDashboardData() {
     state.filteredProducts = [...state.products];
 
     renderProductsTable();
+    renderOrderProductOptions();
     renderOrdersTable();
     renderUsersTable();
     updateSummary();
@@ -487,6 +526,28 @@ async function loadDashboardData() {
 }
 
 let editingProductId = null;
+let editingOrderId = null;
+
+function openOrderForm(order = null) {
+  editingOrderId = order ? order.id : null;
+
+  if (elements.adminOrderForm) {
+    elements.adminOrderForm.reset();
+  }
+
+  if (elements.adminOrderCode) elements.adminOrderCode.value = order?.code || "";
+  if (elements.adminOrderCustomer) elements.adminOrderCustomer.value = order?.customer || "";
+  if (elements.adminOrderProducts) {
+    renderOrderProductOptions(order?.products || "");
+  }
+  if (elements.adminOrderTotal) elements.adminOrderTotal.value = order?.total || 0;
+  if (elements.adminOrderStatus) elements.adminOrderStatus.value = order?.status || "pending";
+  if (elements.adminOrderStatusText) {
+    elements.adminOrderStatusText.textContent = order ? "Đang chỉnh sửa đơn hàng." : "";
+  }
+
+  openModal(elements.adminOrderModal);
+}
 
 function openProductForm(product = null) {
   editingProductId = product ? product.id : null;
@@ -529,11 +590,57 @@ function bindEvents() {
 
   elements.refreshAdminData?.addEventListener("click", loadDashboardData);
   elements.openAddProductForm?.addEventListener("click", () => openProductForm());
+  elements.openAddOrderForm?.addEventListener("click", () => {
+    renderOrderProductOptions("");
+    openOrderForm();
+  });
 
+  elements.orderSearch?.addEventListener("input", renderOrdersTable);
   elements.productSearch?.addEventListener("input", filterProducts);
   elements.productCategoryFilter?.addEventListener("change", filterProducts);
   elements.adminProductCategory?.addEventListener("change", () => {
     populateFolderSelect(elements.adminProductCategory?.value || "gaming-laptop");
+  });
+
+  elements.adminOrderForm?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const payload = {
+      code: elements.adminOrderCode?.value.trim() || "",
+      customer: elements.adminOrderCustomer?.value.trim() || "",
+      products: elements.adminOrderProducts?.value.trim() || "",
+      total: Number(elements.adminOrderTotal?.value || 0),
+      status: elements.adminOrderStatus?.value || "pending",
+    };
+
+    try {
+      if (elements.adminOrderStatusText) {
+        elements.adminOrderStatusText.textContent = editingOrderId ? "Đang cập nhật đơn hàng..." : "Đang tạo đơn hàng...";
+      }
+
+      if (editingOrderId) {
+        await apiFetch(`/api/admin/orders/${editingOrderId}`, {
+          method: "PATCH",
+          body: JSON.stringify(payload),
+        });
+      } else {
+        await apiFetch("/api/admin/orders", {
+          method: "POST",
+          body: JSON.stringify(payload),
+        });
+      }
+
+      if (elements.adminOrderStatusText) {
+        elements.adminOrderStatusText.textContent = "Lưu đơn hàng thành công.";
+      }
+
+      closeModal(elements.adminOrderModal);
+      await loadDashboardData();
+    } catch (error) {
+      if (elements.adminOrderStatusText) {
+        elements.adminOrderStatusText.textContent = error.message || "Không thể lưu đơn hàng";
+      }
+    }
   });
 
   elements.adminProductForm?.addEventListener("submit", async (event) => {
@@ -612,6 +719,13 @@ function bindEvents() {
       return;
     }
 
+    if (action === "edit-order") {
+      const order = state.orders.find((item) => String(item.id) === String(id));
+      if (!order) return;
+      openOrderForm(order);
+      return;
+    }
+
     if (action === "delete-product") {
       const confirmed = window.confirm("Xoá sản phẩm này?");
       if (!confirmed) return;
@@ -639,6 +753,7 @@ function bindEvents() {
 
   elements.globalBackdrop?.addEventListener("click", () => {
     closeModal(elements.adminProductModal);
+    closeModal(elements.adminOrderModal);
   });
 }
 

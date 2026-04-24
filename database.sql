@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS orders (
   id INT AUTO_INCREMENT PRIMARY KEY,
   code VARCHAR(100) NOT NULL UNIQUE,
   customer VARCHAR(255) NOT NULL,
+  products TEXT DEFAULT NULL,
   total BIGINT NOT NULL DEFAULT 0,
   status VARCHAR(50) NOT NULL DEFAULT 'pending',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -72,16 +73,18 @@ ON DUPLICATE KEY UPDATE
   image = VALUES(image),
   is_active = VALUES(is_active);
 
-INSERT INTO orders (code, customer, total, status, created_at)
+INSERT INTO orders (code, customer, products, total, status, created_at)
 VALUES (
   'DH-0001',
   'Nguyễn Văn A',
+  'HP Omen 15-dh0172TX Gaming Laptop',
   45990000,
   'pending',
   '2026-04-24 08:30:00'
 )
 ON DUPLICATE KEY UPDATE
   customer = VALUES(customer),
+  products = VALUES(products),
   total = VALUES(total),
   status = VALUES(status),
   created_at = VALUES(created_at);

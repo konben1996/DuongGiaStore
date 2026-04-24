@@ -190,6 +190,11 @@
                   <span class="section-kicker">Orders</span>
                   <h2>Danh sách đơn hàng</h2>
                 </div>
+                <button type="button" class="btn btn--primary" id="openAddOrderForm">+ Tạo đơn hàng</button>
+              </div>
+
+              <div class="admin-toolbar">
+                <input type="search" id="orderSearch" placeholder="Tìm theo mã đơn hàng..." />
               </div>
 
               <div class="table-wrap">
@@ -198,14 +203,16 @@
                     <tr>
                       <th>Mã đơn</th>
                       <th>Khách hàng</th>
+                      <th>Sản phẩm</th>
                       <th>Tổng tiền</th>
                       <th>Trạng thái</th>
                       <th>Ngày tạo</th>
+                      <th>Hành động</th>
                     </tr>
                   </thead>
                   <tbody id="adminOrdersTable">
                     <tr>
-                      <td colspan="5" class="admin-table__empty">Đang tải dữ liệu đơn hàng.</td>
+                      <td colspan="6" class="admin-table__empty">Đang tải dữ liệu đơn hàng.</td>
                     </tr>
                   </tbody>
                 </table>
@@ -278,6 +285,58 @@
   </div>
 
   <div class="backdrop" id="globalBackdrop" hidden></div>
+
+  <div class="modal" id="adminOrderModal" aria-hidden="true">
+    <div class="modal__overlay" data-close-modal="adminOrderModal"></div>
+    <div class="modal__content modal__content--auth" role="dialog" aria-modal="true" aria-labelledby="adminOrderModalTitle">
+      <button type="button" class="modal__close" data-close-modal="adminOrderModal" aria-label="Đóng form">✕</button>
+      <div class="auth-panel">
+        <div class="auth-panel__header">
+          <span class="section-kicker">Orders</span>
+          <h3 id="adminOrderModalTitle">Tạo / sửa đơn hàng</h3>
+          <p>Form quản trị để tạo và cập nhật đơn hàng.</p>
+        </div>
+
+        <form class="auth-form" id="adminOrderForm">
+          <label>
+            <span>Mã đơn hàng</span>
+            <input type="text" id="adminOrderCode" placeholder="VD: DH-0002" />
+          </label>
+
+          <label>
+            <span>Tên khách hàng</span>
+            <input type="text" id="adminOrderCustomer" placeholder="Nguyễn Văn A" />
+          </label>
+
+          <label>
+            <span>Sản phẩm</span>
+            <select id="adminOrderProducts">
+              <option value="">Đang tải danh sách sản phẩm...</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Tổng tiền</span>
+            <input type="number" id="adminOrderTotal" placeholder="0" />
+          </label>
+
+          <label>
+            <span>Trạng thái</span>
+            <select id="adminOrderStatus">
+              <option value="pending">Chờ xác nhận</option>
+              <option value="shipping">Đang giao</option>
+              <option value="completed">Hoàn thành</option>
+              <option value="cancelled">Đã huỷ</option>
+            </select>
+          </label>
+
+          <button type="submit" class="btn btn--primary btn--block">Lưu đơn hàng</button>
+          <button type="button" class="btn btn--light btn--block" data-close-modal="adminOrderModal">Đóng</button>
+          <p class="auth-status" id="adminOrderStatusText" aria-live="polite"></p>
+        </form>
+      </div>
+    </div>
+  </div>
 
   <div class="modal" id="adminProductModal" aria-hidden="true">
     <div class="modal__overlay" data-close-modal="adminProductModal"></div>

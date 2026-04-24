@@ -34,6 +34,7 @@ const pool = mysql.createPool({
 });
 
 const memoryUsers = [];
+const memoryOrders = [];
 
 function loadLocalProducts() {
   const files = [
@@ -598,13 +599,27 @@ async function fetchAdminUsers() {
 
 async function fetchAdminOrders() {
   const result = await getDbOrFallbackRows(
-    'SELECT id, code, customer, total, status, created_at FROM orders ORDER BY id DESC'
+    'SELECT id, code, customer, products, total, status, created_at, updated_at FROM orders ORDER BY id DESC'
   );
   if (result.ok) {
     return result.rows;
   }
 
-  return [];
+  return [...memoryOrders].reverse();
+}
+
+function normalizeOrderPayload(body = {}) {
+  const code = typeof body.code === 'string' ? body.code.trim() : '';
+  const customer = typeof body.customer === 'string' ? body.customer.trim() : '';
+  const status = typeof body.status === 'string' ? body.status.trim() : 'pending';
+  const total = Number(body.total || 0);
+
+  return {
+    code,
+    customer,
+    status,
+    total: Number.isFinite(total) ? total : 0,
+  };
 }
 
 app.get('/api/admin/dashboard', authMiddleware, requireAdmin, async (req, res) => {
@@ -636,6 +651,126 @@ app.get('/api/admin/users', authMiddleware, requireAdmin, async (req, res) => {
 app.get('/api/admin/orders', authMiddleware, requireAdmin, async (req, res) => {
   const orders = await fetchAdminOrders();
   return res.json({ orders });
+});
+
+app.post('/api/admin/orders', authMiddleware, requireAdmin, async (req, res) => {
+  const { code, customer, status, total } = normalizeOrderPayload(req.body || {});
+
+  if (!code || !customer) {
+    return res.status(400).json({ message: 'Thiếu mã đơn hàng hoặc tên khách hàng' });
+  }
+
+  const products = typeof req.body.products === 'string' ? req.body.products.trim() : '';
+  const dbCheck = await getDbOrFallbackRows('SELECT id FROM orders WHERE code = ? LIMIT 1', [code]);
+  if (dbCheck.ok && dbCheck.rows.length > 0) {
+    return res.status(409).json({ message: 'Mã đơn hàng đã tồn tại' });
+  }
+
+  if (dbCheck.ok) {
+    const [result] = await pool.query(
+      'INSERT INTO orders (code, customer, products, total, status) VALUES (?, ?, ?, ?, ?)',
+      [code, customer, products || null, total, status]
+    );
+
+    const inserted = await pool.query(
+      'SELECT id, code, customer, products, total, status, created_at, updated_at FROM orders WHERE id = ? LIMIT 1',
+      [result.insertId]
+    );
+
+    return res.status(201).json({
+      message: 'Tạo đơn hàng thành công',
+      order: inserted[0][0],
+    });
+  }
+
+  const fallbackOrder = {
+    id: memoryOrders.length + 1,
+    code,
+    customer,
+    products: products || null,
+    total,
+    status,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  };
+
+  memoryOrders.push(fallbackOrder);
+
+  return res.status(201).json({
+    message: 'Tạo đơn hàng thành công',
+    order: fallbackOrder,
+  });
+});
+
+app.patch('/api/admin/orders/:id', authMiddleware, requireAdmin, async (req, res) => {
+  const orderId = Number(req.params.id);
+  if (!Number.isFinite(orderId)) {
+    return res.status(400).json({ message: 'ID đơn hàng không hợp lệ' });
+  }
+
+  const dbCheck = await getDbOrFallbackRows('SELECT id FROM orders WHERE id = ? LIMIT 1', [orderId]);
+  if (dbCheck.ok && dbCheck.rows.length === 0) {
+    return res.status(404).json({ message: 'Không tìm thấy đơn hàng' });
+  }
+
+  const { code, customer, status, total } = normalizeOrderPayload(req.body || {});
+  const products = typeof req.body.products === 'string' ? req.body.products.trim() : '';
+
+  if (dbCheck.ok) {
+    const current = await pool.query('SELECT id, code, customer, products, total, status FROM orders WHERE id = ? LIMIT 1', [orderId]);
+    const currentOrder = current[0][0];
+
+    const nextCode = code || currentOrder.code;
+    const nextCustomer = customer || currentOrder.customer;
+    const nextProducts = products !== '' ? products : currentOrder.products;
+    const nextStatus = status || currentOrder.status;
+    const nextTotal = Number.isFinite(total) && total !== 0 ? total : currentOrder.total;
+
+    if (code && code !== currentOrder.code) {
+      const duplicate = await getDbOrFallbackRows('SELECT id FROM orders WHERE code = ? AND id <> ? LIMIT 1', [code, orderId]);
+      if (duplicate.ok && duplicate.rows.length > 0) {
+        return res.status(409).json({ message: 'Mã đơn hàng đã tồn tại' });
+      }
+    }
+
+    await pool.query(
+      'UPDATE orders SET code = ?, customer = ?, products = ?, total = ?, status = ? WHERE id = ?',
+      [nextCode, nextCustomer, nextProducts, nextTotal, nextStatus, orderId]
+    );
+
+    const updated = await pool.query(
+      'SELECT id, code, customer, products, total, status, created_at, updated_at FROM orders WHERE id = ? LIMIT 1',
+      [orderId]
+    );
+
+    return res.json({
+      message: 'Cập nhật đơn hàng thành công',
+      order: updated[0][0],
+    });
+  }
+
+  const currentOrderIndex = memoryOrders.findIndex((item) => Number(item.id) === orderId);
+  if (currentOrderIndex === -1) {
+    return res.status(404).json({ message: 'Không tìm thấy đơn hàng' });
+  }
+
+  const currentOrder = memoryOrders[currentOrderIndex];
+  const nextOrder = {
+    ...currentOrder,
+    code: code || currentOrder.code,
+    customer: customer || currentOrder.customer,
+    products: products !== '' ? products : currentOrder.products,
+    total: Number.isFinite(total) && total !== 0 ? total : currentOrder.total,
+    status: status || currentOrder.status,
+    updated_at: new Date().toISOString(),
+  };
+
+  memoryOrders[currentOrderIndex] = nextOrder;
+
+  return res.json({
+    message: 'Cập nhật đơn hàng thành công',
+    order: nextOrder,
+  });
 });
 
 app.patch('/api/admin/users/:id', authMiddleware, requireAdmin, async (req, res) => {
