@@ -27,7 +27,7 @@
           <div class="user-chip" id="userChip" hidden>
             <span class="user-chip__label">Xin chào</span>
             <strong class="user-chip__name" id="userChipName">
-              Khách <span class="user-chip__arrow" aria-hidden="true">⌄</span>
+              Khách
             </strong>
             <button type="button" class="login-btn login-btn--logout" id="logoutBtn">
               Đăng xuất
@@ -56,9 +56,25 @@
           <a href="index.html#laptops">Máy tính xách tay</a>
           <a href="index.html#desktop">Máy tính để bàn</a>
           <a href="index.html#gaming">Laptop game & đồ họa</a>
-          <a href="#" id="accountMenuLink" hidden>Thông tin tài khoản</a>
+          <a href="account.html" id="accountMenuLink" hidden>Thông tin tài khoản</a>
         </div>
       </nav>
+      <div class="drawer mobile-drawer" id="mobileDrawer" aria-hidden="true">
+        <div class="drawer__header">
+          <strong>Danh mục</strong>
+          <button type="button" class="icon-btn" data-close-drawer="mobileDrawer" aria-label="Đóng menu">✕</button>
+        </div>
+        <nav class="drawer__nav">
+          <a href="index.html#home">Trang chủ</a>
+          <a href="index.html#featured">Sản phẩm bán chạy</a>
+          <a href="index.html#new-products">Sản phẩm mới</a>
+          <a href="index.html#promo-products">Khuyến mãi</a>
+          <a href="index.html#laptops">Máy tính xách tay</a>
+          <a href="index.html#desktop">Máy tính để bàn</a>
+          <a href="index.html#gaming">Laptop game & đồ họa</a>
+          <a href="account.html" id="accountMenuLinkMobile" hidden onclick="window.DuongGiaStoreLayout && window.DuongGiaStoreLayout.navigateToAccount && window.DuongGiaStoreLayout.navigateToAccount(event)">Thông tin tài khoản</a>
+        </nav>
+      </div>
       <div class="account-popover" id="accountPopover" hidden>
         <div class="account-popover__backdrop" data-close-account-popover="true"></div>
         <div class="account-popover__panel" role="dialog" aria-modal="true" aria-label="Thông tin tài khoản">
@@ -75,12 +91,16 @@
             <p><span>Tài khoản:</span> <strong id="accountPopoverUsername">---</strong></p>
           </div>
           <div class="account-popover__actions">
-            <a href="account.html" class="btn btn--primary btn--block">Xem chi tiết</a>
+            <button type="button" class="btn btn--primary btn--block" id="accountPopoverDetails">Xem chi tiết</button>
             <button type="button" class="btn btn--light btn--block" id="accountPopoverLogout">Đăng xuất</button>
           </div>
         </div>
       </div>
     </header>
+  `;
+
+  const backdropHTML = `
+    <div class="backdrop" id="globalBackdrop" hidden></div>
   `;
 
   const footerHTML = `
@@ -203,7 +223,9 @@
 
   function syncAccountPopover() {
     const accountMenuLink = document.getElementById("accountMenuLink");
+    const accountMenuLinkMobile = document.getElementById("accountMenuLinkMobile");
     const accountPopover = document.getElementById("accountPopover");
+    const globalBackdrop = document.getElementById("globalBackdrop");
     const accountPopoverName = document.getElementById("accountPopoverName");
     const accountPopoverEmail = document.getElementById("accountPopoverEmail");
     const accountPopoverPhone = document.getElementById("accountPopoverPhone");
@@ -215,9 +237,16 @@
     if (accountMenuLink) {
       accountMenuLink.hidden = !isLoggedIn;
     }
+    if (accountMenuLinkMobile) {
+      accountMenuLinkMobile.hidden = !isLoggedIn;
+    }
 
     if (accountPopover) {
       accountPopover.hidden = true;
+    }
+
+    if (globalBackdrop) {
+      globalBackdrop.hidden = true;
     }
 
     if (isLoggedIn && storedUser) {
@@ -233,40 +262,136 @@
 
   function openAccountPopover() {
     const accountPopover = document.getElementById("accountPopover");
+    const globalBackdrop = document.getElementById("globalBackdrop");
     if (accountPopover) accountPopover.hidden = false;
+    if (globalBackdrop) globalBackdrop.hidden = false;
   }
 
   function closeAccountPopover() {
     const accountPopover = document.getElementById("accountPopover");
+    const globalBackdrop = document.getElementById("globalBackdrop");
     if (accountPopover) accountPopover.hidden = true;
+    if (globalBackdrop) globalBackdrop.hidden = true;
+  }
+
+  function ensureBackdrop() {
+    if (!document.getElementById("globalBackdrop")) {
+      document.body.insertAdjacentHTML("beforeend", backdropHTML);
+    }
+  }
+
+  function getMobileDrawer() {
+    return document.getElementById("mobileDrawer");
+  }
+
+  function openMobileDrawer() {
+    const mobileDrawer = getMobileDrawer();
+    const globalBackdrop = document.getElementById("globalBackdrop");
+    if (mobileDrawer) {
+      mobileDrawer.classList.add("is-open");
+      mobileDrawer.setAttribute("aria-hidden", "false");
+    }
+    if (globalBackdrop) {
+      globalBackdrop.hidden = false;
+    }
+    document.body.classList.add("is-locked");
+  }
+
+  function closeMobileDrawer() {
+    const mobileDrawer = getMobileDrawer();
+    const globalBackdrop = document.getElementById("globalBackdrop");
+    if (mobileDrawer) {
+      mobileDrawer.classList.remove("is-open");
+      mobileDrawer.setAttribute("aria-hidden", "true");
+    }
+    if (globalBackdrop) {
+      globalBackdrop.hidden = true;
+    }
+    document.body.classList.remove("is-locked");
+  }
+
+  function bindNavigationLinks() {
+    const accountMenuLink = document.getElementById("accountMenuLink");
+    const accountMenuLinkMobile = document.getElementById("accountMenuLinkMobile");
+
+    if (accountMenuLink && !accountMenuLink.dataset.boundAccountNav) {
+      accountMenuLink.dataset.boundAccountNav = "true";
+      accountMenuLink.addEventListener("click", (event) => {
+        event.preventDefault();
+        window.location.href = "account.html";
+      });
+    }
+
+    if (accountMenuLinkMobile && !accountMenuLinkMobile.dataset.boundAccountNav) {
+      accountMenuLinkMobile.dataset.boundAccountNav = "true";
+      accountMenuLinkMobile.addEventListener("click", (event) => {
+        event.preventDefault();
+        closeMobileDrawer();
+        closeAccountPopover();
+        window.location.href = "account.html";
+      });
+    }
   }
 
   function renderLayout() {
     renderHeader();
     renderFooter();
     renderLoginModal();
+    ensureBackdrop();
     syncAccountPopover();
+    bindNavigationLinks();
   }
 
   document.addEventListener("click", (event) => {
+    const mobileMenuButton = event.target.closest("#openMobileMenu");
+    if (mobileMenuButton) {
+      event.preventDefault();
+      openMobileDrawer();
+      return;
+    }
+
+    if (event.target.closest("[data-close-drawer='mobileDrawer']")) {
+      closeMobileDrawer();
+      return;
+    }
+
     const accountMenuLink = event.target.closest("#accountMenuLink");
     if (accountMenuLink) {
       event.preventDefault();
-      const storedToken = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
-      const storedUser = getStoredAuthUser();
-      if (storedToken || storedUser) {
-        const accountPopover = document.getElementById("accountPopover");
-        if (accountPopover && accountPopover.hidden) {
-          openAccountPopover();
-        } else {
-          closeAccountPopover();
-        }
-      }
+      window.location.href = "account.html";
+      return;
+    }
+
+    const accountMenuLinkMobile = event.target.closest("#accountMenuLinkMobile");
+    if (accountMenuLinkMobile) {
+      event.preventDefault();
+      closeMobileDrawer();
+      closeAccountPopover();
+      window.location.href = "account.html";
+      return;
+    }
+
+    const mobileDrawerLink = event.target.closest("#mobileDrawer a");
+    if (mobileDrawerLink) {
+      closeMobileDrawer();
       return;
     }
 
     if (event.target.closest("[data-close-account-popover='true']")) {
       closeAccountPopover();
+      return;
+    }
+
+    if (event.target.closest("#globalBackdrop")) {
+      closeAccountPopover();
+      closeMobileDrawer();
+      return;
+    }
+
+    const detailsBtn = event.target.closest("#accountPopoverDetails");
+    if (detailsBtn) {
+      closeAccountPopover();
+      window.location.href = "account.html";
       return;
     }
 
@@ -283,6 +408,15 @@
   });
 
   window.addEventListener("storage", syncAccountPopover);
+  window.addEventListener("auth-changed", syncAccountPopover);
+  window.addEventListener("load", ensureBackdrop);
+
+  function navigateToAccount(event) {
+    if (event) event.preventDefault();
+    closeMobileDrawer();
+    closeAccountPopover();
+    window.location.href = "account.html";
+  }
 
   window.DuongGiaStoreLayout = {
     renderHeader,
@@ -290,6 +424,7 @@
     renderLoginModal,
     renderLayout,
     syncAccountPopover,
+    navigateToAccount,
   };
 
   renderLayout();

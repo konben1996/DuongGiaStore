@@ -168,6 +168,140 @@ app.get('/api/auth/me', authMiddleware, async (req, res) => {
   }
 });
 
+app.patch('/api/auth/me', authMiddleware, async (req, res) => {
+  try {
+    const { name, phone } = req.body;
+
+    if (name !== undefined && typeof name !== 'string') {
+      return res.status(400).json({ message: 'Tên không hợp lệ' });
+    }
+
+    if (phone !== undefined && phone !== null && typeof phone !== 'string') {
+      return res.status(400).json({ message: 'Số điện thoại không hợp lệ' });
+    }
+
+    const nextName = typeof name === 'string' ? name.trim() : undefined;
+    const nextPhone = phone === undefined ? undefined : phone === null ? null : phone.trim();
+
+    if (nextName !== undefined && !nextName) {
+      return res.status(400).json({ message: 'Tên không được để trống' });
+    }
+
+    const currentUserDb = await getDbOrFallbackRows(
+      'SELECT id, email, name, phone, role, created_at FROM users WHERE id = ? LIMIT 1',
+      [req.user.id]
+    );
+
+    if (currentUserDb.ok) {
+      if (currentUserDb.rows.length === 0) {
+        return res.status(404).json({ message: 'Không tìm thấy người dùng' });
+      }
+
+      const currentUser = currentUserDb.rows[0];
+      const updatedName = nextName !== undefined ? nextName : currentUser.name;
+      const updatedPhone = nextPhone !== undefined ? nextPhone : currentUser.phone || null;
+
+      await pool.query('UPDATE users SET name = ?, phone = ? WHERE id = ?', [
+        updatedName,
+        updatedPhone,
+        req.user.id,
+      ]);
+
+      return res.json({
+        message: 'Cập nhật hồ sơ thành công',
+        user: {
+          ...currentUser,
+          name: updatedName,
+          phone: updatedPhone,
+        },
+      });
+    }
+
+    const memoryUserIndex = memoryUsers.findIndex((item) => item.id === req.user.id);
+    if (memoryUserIndex === -1) {
+      return res.status(404).json({ message: 'Không tìm thấy người dùng' });
+    }
+
+    const currentUser = memoryUsers[memoryUserIndex];
+    const updatedUser = {
+      ...currentUser,
+      name: nextName !== undefined ? nextName : currentUser.name,
+      phone: nextPhone !== undefined ? nextPhone : currentUser.phone || null,
+    };
+
+    memoryUsers[memoryUserIndex] = updatedUser;
+
+    return res.json({
+      message: 'Cập nhật hồ sơ thành công',
+      user: normalizeUser(updatedUser),
+    });
+  } catch (error) {
+    return res.status(500).json({ message: 'Lỗi server', error: error.message });
+  }
+});
+
+app.patch('/api/auth/me/password', authMiddleware, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: 'Thiếu mật khẩu hiện tại hoặc mật khẩu mới' });
+    }
+
+    if (typeof currentPassword !== 'string' || typeof newPassword !== 'string') {
+      return res.status(400).json({ message: 'Mật khẩu không hợp lệ' });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: 'Mật khẩu mới phải có ít nhất 6 ký tự' });
+    }
+
+    const currentUserDb = await getDbOrFallbackRows(
+      'SELECT id, email, password_hash, name, phone, role, created_at FROM users WHERE id = ? LIMIT 1',
+      [req.user.id]
+    );
+
+    if (currentUserDb.ok) {
+      if (currentUserDb.rows.length === 0) {
+        return res.status(404).json({ message: 'Không tìm thấy người dùng' });
+      }
+
+      const currentUser = currentUserDb.rows[0];
+      const isMatch = await bcrypt.compare(currentPassword, currentUser.password_hash);
+      if (!isMatch) {
+        return res.status(400).json({ message: 'Mật khẩu hiện tại không đúng' });
+      }
+
+      const newPasswordHash = await bcrypt.hash(newPassword, 10);
+      await pool.query('UPDATE users SET password_hash = ? WHERE id = ?', [newPasswordHash, req.user.id]);
+
+      return res.json({ message: 'Đổi mật khẩu thành công' });
+    }
+
+    const memoryUserIndex = memoryUsers.findIndex((item) => item.id === req.user.id);
+    if (memoryUserIndex === -1) {
+      return res.status(404).json({ message: 'Không tìm thấy người dùng' });
+    }
+
+    const currentUser = memoryUsers[memoryUserIndex];
+    const isMatch = await bcrypt.compare(currentPassword, currentUser.password_hash || currentUser.passwordHash);
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Mật khẩu hiện tại không đúng' });
+    }
+
+    const newPasswordHash = await bcrypt.hash(newPassword, 10);
+    memoryUsers[memoryUserIndex] = {
+      ...currentUser,
+      password_hash: newPasswordHash,
+      passwordHash: newPasswordHash,
+    };
+
+    return res.json({ message: 'Đổi mật khẩu thành công' });
+  } catch (error) {
+    return res.status(500).json({ message: 'Lỗi server', error: error.message });
+  }
+});
+
 app.post('/api/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body;

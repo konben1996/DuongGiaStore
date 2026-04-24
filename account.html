@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thông tin tài khoản - Đường Gia Phát</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="siteHeader"></div>
+
+  <main class="site-shell auth-page account-page">
+    <section class="container section">
+      <div class="section-heading section-heading--center">
+        <div>
+          <span class="section-kicker">Tài khoản của bạn</span>
+          <h2>Thông tin khách hàng</h2>
+          <p class="account-page__lead">Xem nhanh thông tin đăng nhập, số điện thoại và trạng thái tài khoản hiện tại.</p>
+        </div>
+      </div>
+
+      <div class="account-page__grid">
+        <article class="account-card">
+          <div class="account-card__header">
+            <div>
+              <span class="account-card__label">Hồ sơ</span>
+              <h3 id="accountName">Khách hàng</h3>
+            </div>
+            <button type="button" class="btn btn--light" id="accountLogoutBtn" hidden style="display:none;">Đăng xuất</button>
+          </div>
+
+          <div class="account-card__body">
+            <div class="account-card__row">
+              <span>Họ và tên</span>
+              <strong id="accountFullName">---</strong>
+            </div>
+            <div class="account-card__row">
+              <span>Email</span>
+              <strong id="accountEmail">---</strong>
+            </div>
+            <div class="account-card__row">
+              <span>Số điện thoại</span>
+              <strong id="accountPhone">---</strong>
+            </div>
+            <div class="account-card__row">
+              <span>Tài khoản</span>
+              <strong id="accountUsername">---</strong>
+            </div>
+            <div class="account-card__row">
+              <span>Vai trò</span>
+              <strong id="accountRole">---</strong>
+            </div>
+          </div>
+        </article>
+
+        <article class="account-card account-card--info">
+          <div class="account-card__header">
+            <div>
+              <span class="account-card__label">Chỉnh sửa</span>
+              <h3>Thông tin cơ bản</h3>
+            </div>
+          </div>
+
+          <div class="account-card__body">
+            <p class="account-page__text">
+              Cập nhật họ tên và số điện thoại. Email và vai trò sẽ được giữ nguyên.
+            </p>
+
+            <form class="account-edit account-edit--compact" id="accountEditForm">
+              <div class="account-edit__grid">
+                <label class="account-edit__field">
+                  <span>Họ và tên</span>
+                  <input type="text" id="accountEditName" autocomplete="name" placeholder="Nhập họ tên" />
+                </label>
+
+                <label class="account-edit__field">
+                  <span>Số điện thoại</span>
+                  <input type="tel" id="accountEditPhone" autocomplete="tel" placeholder="Nhập số điện thoại" />
+                </label>
+              </div>
+
+              <p class="auth-status" id="accountEditStatus" aria-live="polite"></p>
+
+              <div class="account-page__actions">
+                <button type="submit" class="btn btn--primary" id="accountSaveBtn">Lưu thay đổi</button>
+              </div>
+            </form>
+
+            <hr class="account-divider" />
+
+            <form class="account-edit" id="accountPasswordForm">
+              <label class="account-edit__field">
+                <span>Mật khẩu hiện tại</span>
+                <input type="password" id="accountCurrentPassword" autocomplete="current-password" placeholder="Nhập mật khẩu hiện tại" />
+              </label>
+
+              <label class="account-edit__field account-edit__field--password">
+                <span>Mật khẩu mới</span>
+                <div class="account-password">
+                  <input type="password" id="accountNewPassword" autocomplete="new-password" placeholder="Nhập mật khẩu mới" />
+                  <button type="button" class="account-password__toggle" id="toggleNewPassword" aria-label="Hiện mật khẩu mới">Hiện</button>
+                </div>
+              </label>
+
+              <label class="account-edit__field account-edit__field--password">
+                <span>Nhập lại mật khẩu mới</span>
+                <div class="account-password">
+                  <input type="password" id="accountConfirmPassword" autocomplete="new-password" placeholder="Nhập lại mật khẩu mới" />
+                  <button type="button" class="account-password__toggle" id="toggleConfirmPassword" aria-label="Hiện mật khẩu nhập lại">Hiện</button>
+                </div>
+              </label>
+
+              <p class="auth-status" id="accountPasswordStatus" aria-live="polite"></p>
+
+              <div class="account-page__actions">
+                <button type="submit" class="btn btn--primary" id="accountPasswordSaveBtn" disabled>Đổi mật khẩu</button>
+                <button type="button" class="btn btn--light" id="accountPasswordClearBtn">Xoá nội dung</button>
+              </div>
+            </form>
+          </div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <div id="siteModal"></div>
+  <div id="siteFooter"></div>
+
+  <script src="js/components/layout.js"></script>
+  <script>
+    (function () {
+      function readStoredAuth() {
+        try {
+          const user = JSON.parse(localStorage.getItem("authUser") || sessionStorage.getItem("authUser") || "null");
+          const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+          return {
+            user,
+            token,
+            isLoggedIn: Boolean(user && token),
+            storage: localStorage.getItem("authToken") ? localStorage : sessionStorage,
+          };
+        } catch (error) {
+          return {
+            user: null,
+            token: null,
+            isLoggedIn: false,
+            storage: null,
+          };
+        }
+      }
+
+      function syncHeaderAuthState(auth) {
+        const loginButton = document.getElementById("openLoginModal");
+        const userChip = document.getElementById("userChip");
+        const userChipName = document.getElementById("userChipName");
+        const accountMenuLink = document.getElementById("accountMenuLink");
+
+        if (auth.isLoggedIn) {
+          if (loginButton) {
+            loginButton.style.display = "none";
+            loginButton.setAttribute("aria-hidden", "true");
+          }
+          if (userChip) userChip.hidden = false;
+          if (userChipName) userChipName.childNodes[0].textContent = auth.user?.name || "Khách ";
+          if (accountMenuLink) accountMenuLink.hidden = false;
+          return;
+        }
+
+        if (loginButton) {
+          loginButton.style.display = "";
+          loginButton.removeAttribute("aria-hidden");
+        }
+        if (userChip) userChip.hidden = true;
+        if (accountMenuLink) accountMenuLink.hidden = true;
+      }
+
+      function getAuthToken() {
+        return localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+      }
+
+      function getAuthStorage() {
+        return localStorage.getItem("authToken") ? localStorage : sessionStorage;
+      }
+
+      function setStatus(message, isError = false) {
+        const statusEl = document.getElementById("accountEditStatus");
+        if (!statusEl) return;
+        statusEl.textContent = message;
+        statusEl.classList.toggle("is-error", isError);
+      }
+
+      function setPasswordStatus(message, isError = false) {
+        const statusEl = document.getElementById("accountPasswordStatus");
+        if (!statusEl) return;
+        statusEl.textContent = message;
+        statusEl.classList.toggle("is-error", isError);
+      }
+
+      function clearPasswordForm() {
+        const currentPasswordInput = document.getElementById("accountCurrentPassword");
+        const newPasswordInput = document.getElementById("accountNewPassword");
+        const confirmPasswordInput = document.getElementById("accountConfirmPassword");
+        if (currentPasswordInput) currentPasswordInput.value = "";
+        if (newPasswordInput) newPasswordInput.value = "";
+        if (confirmPasswordInput) confirmPasswordInput.value = "";
+        updatePasswordSubmitState();
+        setPasswordStatus("");
+      }
+
+      function togglePasswordVisibility(inputId, buttonId) {
+        const input = document.getElementById(inputId);
+        const button = document.getElementById(buttonId);
+        if (!input || !button) return;
+
+        const isHidden = input.type === "password";
+        input.type = isHidden ? "text" : "password";
+        button.textContent = isHidden ? "Ẩn" : "Hiện";
+        button.setAttribute("aria-label", isHidden ? "Ẩn mật khẩu" : "Hiện mật khẩu");
+      }
+
+      function updatePasswordSubmitState() {
+        const newPasswordInput = document.getElementById("accountNewPassword");
+        const confirmPasswordInput = document.getElementById("accountConfirmPassword");
+        const submitButton = document.getElementById("accountPasswordSaveBtn");
+        if (!newPasswordInput || !confirmPasswordInput || !submitButton) return;
+
+        const newPassword = newPasswordInput.value;
+        const confirmPassword = confirmPasswordInput.value;
+        const isMatch = newPassword.length > 0 && confirmPassword.length > 0 && newPassword === confirmPassword;
+
+        submitButton.disabled = !isMatch;
+      }
+
+      function fillEditForm(user) {
+        const nameInput = document.getElementById("accountEditName");
+        const phoneInput = document.getElementById("accountEditPhone");
+        if (!nameInput || !phoneInput) return;
+        nameInput.value = user?.name || "";
+        phoneInput.value = user?.phone || "";
+      }
+
+      function fillAccountInfo() {
+        const auth = readStoredAuth();
+        const nameEl = document.getElementById("accountName");
+        const fullNameEl = document.getElementById("accountFullName");
+        const emailEl = document.getElementById("accountEmail");
+        const phoneEl = document.getElementById("accountPhone");
+        const usernameEl = document.getElementById("accountUsername");
+        const roleEl = document.getElementById("accountRole");
+        const logoutBtn = document.getElementById("accountLogoutBtn");
+
+        syncHeaderAuthState(auth);
+
+        if (!auth.isLoggedIn) {
+          nameEl.textContent = "Chưa đăng nhập";
+          fullNameEl.textContent = "Vui lòng đăng nhập để xem thông tin tài khoản";
+          emailEl.textContent = "---";
+          phoneEl.textContent = "---";
+          usernameEl.textContent = "---";
+          roleEl.textContent = "---";
+          logoutBtn.textContent = "Đăng nhập";
+          logoutBtn.dataset.action = "login";
+          fillEditForm(null);
+          return;
+        }
+
+        const user = auth.user || {};
+        nameEl.textContent = user.name || "Khách hàng";
+        fullNameEl.textContent = user.name || "---";
+        emailEl.textContent = user.email || "---";
+        phoneEl.textContent = user.phone || "---";
+        usernameEl.textContent = user.username || (user.email ? user.email.split("@")[0] : "---");
+        roleEl.textContent = user.role || "user";
+        logoutBtn.textContent = "Đăng xuất";
+        logoutBtn.dataset.action = "logout";
+        fillEditForm(user);
+      }
+
+      document.addEventListener("DOMContentLoaded", fillAccountInfo);
+
+      function handleLogout() {
+        localStorage.removeItem("authToken");
+        localStorage.removeItem("authUser");
+        sessionStorage.removeItem("authToken");
+        sessionStorage.removeItem("authUser");
+        window.dispatchEvent(new Event("auth-changed"));
+        window.location.href = "index.html";
+      }
+
+      const accountLogoutBtn = document.getElementById("accountLogoutBtn");
+      if (accountLogoutBtn) {
+        accountLogoutBtn.addEventListener("click", function () {
+          const auth = readStoredAuth();
+          if (this.dataset.action === "login" || !auth.isLoggedIn) {
+            window.location.href = "login.html";
+            return;
+          }
+
+          handleLogout();
+        });
+      }
+
+      function bindHeaderLogoutButton() {
+        const logoutBtn = document.getElementById("logoutBtn");
+        if (logoutBtn && !logoutBtn.dataset.boundLogout) {
+          logoutBtn.dataset.boundLogout = "true";
+          logoutBtn.addEventListener("click", handleLogout);
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        bindHeaderLogoutButton();
+      });
+
+      window.addEventListener("auth-changed", bindHeaderLogoutButton);
+
+      const accountRefreshBtn = document.getElementById("accountRefreshBtn");
+      if (accountRefreshBtn) {
+        accountRefreshBtn.addEventListener("click", function () {
+          fillAccountInfo();
+        });
+      }
+
+      const accountEditForm = document.getElementById("accountEditForm");
+      if (accountEditForm) {
+        accountEditForm.addEventListener("submit", async function (event) {
+          event.preventDefault();
+
+          const token = getAuthToken();
+          const auth = readStoredAuth();
+          const name = document.getElementById("accountEditName").value.trim();
+          const phone = document.getElementById("accountEditPhone").value.trim();
+
+          if (!token || !auth.isLoggedIn) {
+            setStatus("Bạn cần đăng nhập để cập nhật thông tin.", true);
+            return;
+          }
+
+          if (!name) {
+            setStatus("Họ và tên không được để trống.", true);
+            return;
+          }
+
+          setStatus("Đang lưu thay đổi...");
+
+          try {
+            const response = await fetch("http://localhost:3001/api/auth/me", {
+              method: "PATCH",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({
+                name,
+                phone: phone || null,
+              }),
+            });
+
+            const rawText = await response.text();
+            let data = null;
+
+            try {
+              data = rawText ? JSON.parse(rawText) : null;
+            } catch (parseError) {
+              throw new Error("Máy chủ trả về phản hồi không hợp lệ. Hãy kiểm tra lại server.");
+            }
+
+            if (!response.ok) {
+              throw new Error((data && data.message) || "Không thể cập nhật thông tin");
+            }
+
+            const storage = getAuthStorage();
+            storage.setItem("authUser", JSON.stringify(data.user));
+            window.dispatchEvent(new Event("auth-changed"));
+            setStatus("Cập nhật thông tin thành công.");
+            fillAccountInfo();
+          } catch (error) {
+            setStatus(error.message || "Không thể cập nhật thông tin.", true);
+          }
+        });
+      }
+
+      const accountNewPasswordInput = document.getElementById("accountNewPassword");
+      const accountConfirmPasswordInput = document.getElementById("accountConfirmPassword");
+
+      const toggleNewPasswordBtn = document.getElementById("toggleNewPassword");
+      const toggleConfirmPasswordBtn = document.getElementById("toggleConfirmPassword");
+
+      if (toggleNewPasswordBtn) {
+        toggleNewPasswordBtn.addEventListener("click", function () {
+          togglePasswordVisibility("accountNewPassword", "toggleNewPassword");
+        });
+      }
+
+      if (toggleConfirmPasswordBtn) {
+        toggleConfirmPasswordBtn.addEventListener("click", function () {
+          togglePasswordVisibility("accountConfirmPassword", "toggleConfirmPassword");
+        });
+      }
+
+      if (accountNewPasswordInput) {
+        accountNewPasswordInput.addEventListener("input", function () {
+          if (accountConfirmPasswordInput && accountConfirmPasswordInput.value && this.value !== accountConfirmPasswordInput.value) {
+            setPasswordStatus("Mật khẩu mới nhập lại không khớp.", true);
+          } else {
+            setPasswordStatus("");
+          }
+          updatePasswordSubmitState();
+        });
+      }
+
+      if (accountConfirmPasswordInput) {
+        accountConfirmPasswordInput.addEventListener("input", function () {
+          if (accountNewPasswordInput && accountNewPasswordInput.value && this.value !== accountNewPasswordInput.value) {
+            setPasswordStatus("Mật khẩu mới nhập lại không khớp.", true);
+          } else {
+            setPasswordStatus("");
+          }
+          updatePasswordSubmitState();
+        });
+      }
+
+      const accountPasswordClearBtn = document.getElementById("accountPasswordClearBtn");
+      if (accountPasswordClearBtn) {
+        accountPasswordClearBtn.addEventListener("click", function () {
+          clearPasswordForm();
+        });
+      }
+
+      const accountPasswordForm = document.getElementById("accountPasswordForm");
+      if (accountPasswordForm) {
+        accountPasswordForm.addEventListener("submit", async function (event) {
+          event.preventDefault();
+
+          const token = getAuthToken();
+          const auth = readStoredAuth();
+          const currentPassword = document.getElementById("accountCurrentPassword").value;
+          const newPassword = document.getElementById("accountNewPassword").value;
+          const confirmPassword = document.getElementById("accountConfirmPassword").value;
+
+          if (!token || !auth.isLoggedIn) {
+            setPasswordStatus("Bạn cần đăng nhập để đổi mật khẩu.", true);
+            return;
+          }
+
+          if (!currentPassword || !newPassword || !confirmPassword) {
+            setPasswordStatus("Vui lòng nhập đầy đủ các trường mật khẩu.", true);
+            return;
+          }
+
+          if (newPassword !== confirmPassword) {
+            setPasswordStatus("Mật khẩu mới nhập lại không khớp.", true);
+            document.getElementById("accountConfirmPassword").focus();
+            return;
+          }
+
+          if (newPassword.length < 6) {
+            setPasswordStatus("Mật khẩu mới phải có ít nhất 6 ký tự.", true);
+            return;
+          }
+
+          setPasswordStatus("Đang đổi mật khẩu...");
+
+          try {
+            const response = await fetch("http://localhost:3001/api/auth/me/password", {
+              method: "PATCH",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({
+                currentPassword,
+                newPassword,
+              }),
+            });
+
+            const rawText = await response.text();
+            let data = null;
+
+            try {
+              data = rawText ? JSON.parse(rawText) : null;
+            } catch (parseError) {
+              throw new Error("Máy chủ trả về phản hồi không hợp lệ. Hãy kiểm tra lại server.");
+            }
+
+            if (!response.ok) {
+              throw new Error((data && data.message) || "Không thể đổi mật khẩu");
+            }
+
+            setPasswordStatus("Đổi mật khẩu thành công. Vui lòng đăng nhập lại bằng mật khẩu mới.");
+            clearPasswordForm();
+            localStorage.removeItem("authToken");
+            localStorage.removeItem("authUser");
+            sessionStorage.removeItem("authToken");
+            sessionStorage.removeItem("authUser");
+            window.dispatchEvent(new Event("auth-changed"));
+            setTimeout(() => {
+              window.location.href = "login.html";
+            }, 900);
+          } catch (error) {
+            setPasswordStatus(error.message || "Không thể đổi mật khẩu.", true);
+          }
+        });
+      }
+
+      window.addEventListener("storage", fillAccountInfo);
+      window.addEventListener("auth-changed", fillAccountInfo);
+    })();
+  </script>
+</body>
+</html>
