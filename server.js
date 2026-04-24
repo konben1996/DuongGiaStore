@@ -302,6 +302,53 @@ app.patch('/api/auth/me/password', authMiddleware, async (req, res) => {
   }
 });
 
+app.post('/api/auth/reset-password', async (req, res) => {
+  try {
+    const { email, newPassword } = req.body;
+
+    if (!email || !newPassword) {
+      return res.status(400).json({ message: 'Thiếu email hoặc mật khẩu mới' });
+    }
+
+    if (typeof email !== 'string' || typeof newPassword !== 'string') {
+      return res.status(400).json({ message: 'Dữ liệu không hợp lệ' });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: 'Mật khẩu mới phải có ít nhất 6 ký tự' });
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+
+    const dbCheck = await getDbOrFallbackRows('SELECT id FROM users WHERE email = ? LIMIT 1', [email]);
+
+    if (dbCheck.ok) {
+      if (dbCheck.rows.length === 0) {
+        return res.status(404).json({ message: 'Không tìm thấy tài khoản với email này' });
+      }
+
+      await pool.query('UPDATE users SET password_hash = ? WHERE email = ?', [passwordHash, email]);
+
+      return res.json({ message: 'Đặt lại mật khẩu thành công' });
+    }
+
+    const memoryUserIndex = memoryUsers.findIndex((item) => item.email.toLowerCase() === email.toLowerCase());
+    if (memoryUserIndex === -1) {
+      return res.status(404).json({ message: 'Không tìm thấy tài khoản với email này' });
+    }
+
+    memoryUsers[memoryUserIndex] = {
+      ...memoryUsers[memoryUserIndex],
+      password_hash: passwordHash,
+      passwordHash: passwordHash,
+    };
+
+    return res.json({ message: 'Đặt lại mật khẩu thành công' });
+  } catch (error) {
+    return res.status(500).json({ message: 'Lỗi server', error: error.message });
+  }
+});
+
 app.post('/api/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body;
