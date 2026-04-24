@@ -18,7 +18,7 @@
           type="button"
           class="theme-toggle theme-toggle--mobile mobile-only"
           id="themeToggleMobile"
-          aria-label="Chuyển giao diện sáng tối"
+          aria-label="Chuyển sang giao diện tối"
         >
           <span class="theme-toggle__icon" aria-hidden="true">🌙</span>
         </button>
@@ -41,7 +41,7 @@
           >
             Đăng nhập
           </a>
-          <button type="button" class="theme-toggle" id="themeToggle" aria-label="Chuyển giao diện sáng tối">
+          <button type="button" class="theme-toggle" id="themeToggle" aria-label="Chuyển sang giao diện tối">
             <span class="theme-toggle__icon" aria-hidden="true">🌙</span>
           </button>
         </div>
@@ -333,6 +333,62 @@
     }
   }
 
+  function getSystemTheme() {
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  }
+
+  function updateThemeToggle(theme) {
+    const toggleButtons = [
+      document.getElementById("themeToggle"),
+      document.getElementById("themeToggleMobile"),
+    ].filter(Boolean);
+
+    toggleButtons.forEach((button) => {
+      const icon = button.querySelector(".theme-toggle__icon");
+      const text = button.querySelector(".theme-toggle__text");
+
+      if (icon) icon.textContent = theme === "dark" ? "☀️" : "🌙";
+      if (text) text.textContent = theme === "dark" ? "Giao diện sáng" : "Giao diện tối";
+
+      button.setAttribute(
+        "aria-label",
+        theme === "dark" ? "Chuyển sang giao diện sáng" : "Chuyển sang giao diện tối"
+      );
+    });
+  }
+
+  function applyTheme(theme) {
+    document.body.dataset.theme = theme;
+    updateThemeToggle(theme);
+  }
+
+  function toggleTheme() {
+    const nextTheme = document.body.dataset.theme === "dark" ? "light" : "dark";
+    localStorage.setItem("theme", nextTheme);
+    applyTheme(nextTheme);
+  }
+
+  function initTheme() {
+    const savedTheme = localStorage.getItem("theme");
+    const initialTheme =
+      savedTheme === "dark" || savedTheme === "light" ? savedTheme : "light";
+
+    applyTheme(initialTheme);
+
+    const themeToggle = document.getElementById("themeToggle");
+    const themeToggleMobile = document.getElementById("themeToggleMobile");
+
+    themeToggle?.addEventListener("click", toggleTheme);
+    themeToggleMobile?.addEventListener("click", toggleTheme);
+
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    mediaQuery.addEventListener?.("change", (event) => {
+      const userSavedTheme = localStorage.getItem("theme");
+      if (userSavedTheme === "dark" || userSavedTheme === "light") return;
+      applyTheme(event.matches ? "dark" : "light");
+    });
+  }
+
   function renderLayout() {
     renderHeader();
     renderFooter();
@@ -340,6 +396,7 @@
     ensureBackdrop();
     syncAccountPopover();
     bindNavigationLinks();
+    initTheme();
   }
 
   document.addEventListener("click", (event) => {
@@ -425,6 +482,7 @@
     renderLayout,
     syncAccountPopover,
     navigateToAccount,
+    toggleTheme,
   };
 
   renderLayout();

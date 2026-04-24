@@ -1,3 +1,4 @@
+const API_BASE_URL = window.API_BASE_URL || window.location.origin;
 const productDataSources = Object.values(window.DuongGiaStoreProducts || {});
 const products = productDataSources.flatMap((source) => source.products || []);
 const productGalleries = productDataSources.reduce(
@@ -99,15 +100,6 @@ function initTheme() {
   const initialTheme = savedTheme === "dark" || savedTheme === "light" ? savedTheme : getSystemTheme();
 
   applyTheme(initialTheme);
-
-  const handleThemeToggle = () => {
-    const nextTheme = elements.body.dataset.theme === "dark" ? "light" : "dark";
-    localStorage.setItem("theme", nextTheme);
-    applyTheme(nextTheme);
-  };
-
-  elements.themeToggle?.addEventListener("click", handleThemeToggle);
-  elements.themeToggleMobile?.addEventListener("click", handleThemeToggle);
 
   const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
   mediaQuery.addEventListener?.("change", (event) => {
@@ -332,7 +324,7 @@ function clearAuthStorage() {
 }
 
 async function fetchCurrentUser(token) {
-  const response = await fetch("http://localhost:3001/api/auth/me", {
+  const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -416,7 +408,7 @@ async function handleRegisterSubmit(event) {
   }
 
   try {
-    const response = await fetch("http://localhost:3001/api/auth/register", {
+    const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -480,7 +472,7 @@ async function handleLoginSubmit(event) {
   }
 
   try {
-    const response = await fetch("http://localhost:3001/api/auth/login", {
+    const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
