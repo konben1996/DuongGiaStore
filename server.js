@@ -84,6 +84,14 @@ function resolveImageCategory(category, imageCategory) {
   return CATEGORY_IMAGE_DIRS[imageCategory] ? imageCategory : (CATEGORY_IMAGE_DIRS[category] ? category : "accessory");
 }
 
+function sanitizeFolderName(folderName) {
+  return String(folderName || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9-_]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
 function ensureDirectoryExists(dirPath) {
   fs.mkdirSync(dirPath, { recursive: true });
 }
@@ -659,14 +667,20 @@ app.delete('/api/admin/users/:id', authMiddleware, requireAdmin, async (req, res
 });
 
 app.post('/api/admin/products', authMiddleware, requireAdmin, async (req, res) => {
-  const { name, category, price, stock, image, imageCategory, imageDataUrl, imageFileName } = req.body || {};
+  const { name, category, price, stock, image, imageCategory, imageFolder, imageDataUrl, imageFileName } = req.body || {};
   const dbCheck = await getDbOrFallbackRows('SELECT id FROM products LIMIT 1');
 
   let finalImage = typeof image === 'string' ? image.trim() : '';
   if (imageDataUrl) {
     const targetCategory = resolveImageCategory(category, imageCategory);
-    const targetDir = CATEGORY_IMAGE_DIRS[targetCategory] || CATEGORY_IMAGE_DIRS.accessory;
+    const folderName = sanitizeFolderName(imageFolder);
+    if (!folderName) {
+      return res.status(400).json({ message: 'Vui lòng nhập tên thư mục lưu ảnh' });
+    }
+
+    const targetDir = path.join(CATEGORY_IMAGE_DIRS[targetCategory] || CATEGORY_IMAGE_DIRS.accessory, folderName);
     ensureDirectoryExists(targetDir);
+
     const { mimeType, buffer } = decodeDataUrlImage(imageDataUrl);
     const extension = imageFileName ? path.extname(imageFileName) || mimeTypeToExtension(mimeType) : mimeTypeToExtension(mimeType);
     const fileName = safeImageFileName(imageFileName || `product-image${extension}`);
@@ -694,10 +708,31 @@ app.patch('/api/admin/products/:id', authMiddleware, requireAdmin, async (req, r
   const dbCheck = await getDbOrFallbackRows('SELECT id FROM products WHERE id = ? LIMIT 1', [productId]);
   if (dbCheck.ok) {
     if (dbCheck.rows.length === 0) return res.status(404).json({ message: 'Không tìm thấy sản phẩm' });
-    const { name, category, price, stock, image, is_active } = req.body || {};
+
+    const { name, category, price, stock, image, imageCategory, imageFolder, imageDataUrl, imageFileName, is_active } = req.body || {};
+    let finalImage = typeof image === 'string' ? image.trim() : '';
+
+    if (imageDataUrl) {
+      const targetCategory = resolveImageCategory(category, imageCategory);
+      const folderName = sanitizeFolderName(imageFolder);
+      if (!folderName) {
+        return res.status(400).json({ message: 'Vui lòng nhập tên thư mục lưu ảnh' });
+      }
+
+      const targetDir = path.join(CATEGORY_IMAGE_DIRS[targetCategory] || CATEGORY_IMAGE_DIRS.accessory, folderName);
+      ensureDirectoryExists(targetDir);
+
+      const { mimeType, buffer } = decodeDataUrlImage(imageDataUrl);
+      const extension = imageFileName ? path.extname(imageFileName) || mimeTypeToExtension(mimeType) : mimeTypeToExtension(mimeType);
+      const fileName = safeImageFileName(imageFileName || `product-image${extension}`);
+      const filePath = path.join(targetDir, fileName);
+      fs.writeFileSync(filePath, buffer);
+      finalImage = path.relative(__dirname, filePath).split(path.sep).join('/');
+    }
+
     await pool.query(
       'UPDATE products SET name = COALESCE(?, name), category = COALESCE(?, category), price = COALESCE(?, price), stock = COALESCE(?, stock), image = COALESCE(?, image), is_active = COALESCE(?, is_active) WHERE id = ?',
-      [name || null, category || null, price === undefined ? null : Number(price), stock === undefined ? null : Number(stock), image || null, is_active === undefined ? null : Number(Boolean(is_active)), productId]
+      [name || null, category || null, price === undefined ? null : Number(price), stock === undefined ? null : Number(stock), finalImage || null, is_active === undefined ? null : Number(Boolean(is_active)), productId]
     );
     const updated = await pool.query(
       'SELECT id, name, category, price, stock, image, is_active, created_at, updated_at FROM products WHERE id = ? LIMIT 1',

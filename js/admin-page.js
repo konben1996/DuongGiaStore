@@ -39,6 +39,7 @@ const elements = {
   adminProductImage: document.getElementById("adminProductImage"),
   adminProductImageFile: document.getElementById("adminProductImageFile"),
   adminProductImageCategory: document.getElementById("adminProductImageCategory"),
+  adminProductImageFolder: document.getElementById("adminProductImageFolder"),
   adminProductStatus: document.getElementById("adminProductStatus"),
   adminProductsTable: document.getElementById("adminProductsTable"),
   adminUsersTable: document.getElementById("adminUsersTable"),
@@ -121,6 +122,47 @@ function normalizeProduct(product) {
     stock: product.stock ?? 0,
     is_active: product.is_active !== false,
   };
+}
+
+function getFolderOptionsForCategory(category) {
+  return localProducts
+    .filter((product) => product.category === category)
+    .map((product) => product.id)
+    .filter(Boolean);
+}
+
+function ensureFolderSelect() {
+  if (!elements.adminProductImageFolder) return null;
+
+  if (elements.adminProductImageFolder.tagName === "SELECT") {
+    return elements.adminProductImageFolder;
+  }
+
+  const select = document.createElement("select");
+  select.id = "adminProductImageFolder";
+  select.className = elements.adminProductImageFolder.className;
+  elements.adminProductImageFolder.replaceWith(select);
+  elements.adminProductImageFolder = select;
+  return select;
+}
+
+function populateFolderSelect(category, defaultFolder = "") {
+  const select = ensureFolderSelect();
+  if (!select) return;
+
+  const folders = getFolderOptionsForCategory(category);
+  const uniqueFolders = [...new Set(folders)];
+
+  select.innerHTML = `
+    <option value="">-- Chọn thư mục con --</option>
+    ${uniqueFolders.map((folder) => `<option value="${folder}">${folder}</option>`).join("")}
+  `;
+
+  if (defaultFolder && uniqueFolders.includes(defaultFolder)) {
+    select.value = defaultFolder;
+  } else if (uniqueFolders.length) {
+    select.value = uniqueFolders[0];
+  }
 }
 
 async function apiFetch(path, options = {}) {
@@ -476,6 +518,7 @@ function openProductForm(product = null) {
   if (elements.adminProductImageCategory) {
     elements.adminProductImageCategory.value = product?.category || "gaming-laptop";
   }
+  populateFolderSelect(product?.category || elements.adminProductCategory?.value || "gaming-laptop", product?.name ? product.name.trim() : "");
 
   if (product) {
     elements.adminProductName.value = product.name || "";
@@ -506,6 +549,9 @@ function bindEvents() {
 
   elements.productSearch?.addEventListener("input", filterProducts);
   elements.productCategoryFilter?.addEventListener("change", filterProducts);
+  elements.adminProductCategory?.addEventListener("change", () => {
+    populateFolderSelect(elements.adminProductCategory?.value || "gaming-laptop");
+  });
 
   elements.adminProductForm?.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -521,6 +567,7 @@ function bindEvents() {
       : "";
 
     const imageCategory = elements.adminProductImageCategory?.value || elements.adminProductCategory?.value || "accessory";
+    const imageFolder = elements.adminProductImageFolder?.value.trim() || elements.adminProductName?.value.trim() || "";
 
     const payload = {
       name: elements.adminProductName?.value.trim() || "",
@@ -529,6 +576,7 @@ function bindEvents() {
       stock: Number(elements.adminProductStock?.value || 0),
       image: elements.adminProductImage?.value.trim() || "",
       imageCategory,
+      imageFolder,
       imageDataUrl,
       imageFileName: selectedFile?.name || "",
     };
