@@ -596,6 +596,17 @@ async function fetchAdminUsers() {
   ];
 }
 
+async function fetchAdminOrders() {
+  const result = await getDbOrFallbackRows(
+    'SELECT id, code, customer, total, status, created_at FROM orders ORDER BY id DESC'
+  );
+  if (result.ok) {
+    return result.rows;
+  }
+
+  return [];
+}
+
 app.get('/api/admin/dashboard', authMiddleware, requireAdmin, async (req, res) => {
   const [products, users] = await Promise.all([fetchAdminProducts(), fetchAdminUsers()]);
   const topCategory = products.reduce((acc, product) => {
@@ -620,6 +631,11 @@ app.get('/api/admin/products', authMiddleware, requireAdmin, async (req, res) =>
 app.get('/api/admin/users', authMiddleware, requireAdmin, async (req, res) => {
   const users = await fetchAdminUsers();
   return res.json({ users });
+});
+
+app.get('/api/admin/orders', authMiddleware, requireAdmin, async (req, res) => {
+  const orders = await fetchAdminOrders();
+  return res.json({ orders });
 });
 
 app.patch('/api/admin/users/:id', authMiddleware, requireAdmin, async (req, res) => {

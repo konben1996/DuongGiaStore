@@ -192,10 +192,23 @@
                 </div>
               </div>
 
-              <div class="admin-settings">
-                <p>
-                  Khu vực này sẽ hiển thị danh sách đơn hàng, trạng thái và thao tác xử lý đơn trong các bước tiếp theo.
-                </p>
+              <div class="table-wrap">
+                <table class="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Mã đơn</th>
+                      <th>Khách hàng</th>
+                      <th>Tổng tiền</th>
+                      <th>Trạng thái</th>
+                      <th>Ngày tạo</th>
+                    </tr>
+                  </thead>
+                  <tbody id="adminOrdersTable">
+                    <tr>
+                      <td colspan="5" class="admin-table__empty">Đang tải dữ liệu đơn hàng.</td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </article>
 
@@ -303,9 +316,27 @@
             <input type="number" id="adminProductStock" placeholder="0" />
           </label>
 
+          <div class="auth-form__group auth-form__group--highlight">
+            <span class="auth-form__group-title">Khu vực lưu ảnh</span>
+            <p class="auth-form__group-note">Chọn danh mục và thư mục con để ảnh được lưu vào khu vực mới tương ứng.</p>
+            <select id="adminProductImageCategory">
+              <option value="gaming-laptop">Gaming Laptop</option>
+              <option value="office-laptop">Office Laptop</option>
+              <option value="gaming-pc">Gaming PC</option>
+              <option value="accessory">Accessory</option>
+            </select>
+            <input type="text" id="adminProductImageFolder" placeholder="Tên thư mục mới, ví dụ: asus-rog" />
+          </div>
+
           <label>
-            <span>Ảnh</span>
-            <input type="text" id="adminProductImage" placeholder="Link ảnh sản phẩm" />
+            <span>Ảnh sản phẩm</span>
+            <input type="file" id="adminProductImageFile" accept="image/*" />
+          </label>
+          <p class="auth-status auth-status--hint">Ảnh sẽ được lưu vào đúng khu vực bạn chọn ở trên.</p>
+
+          <label>
+            <span>Đường dẫn ảnh</span>
+            <input type="text" id="adminProductImage" placeholder="Link hoặc đường dẫn ảnh sau khi upload" />
           </label>
 
           <button type="submit" class="btn btn--primary btn--block">Lưu sản phẩm</button>

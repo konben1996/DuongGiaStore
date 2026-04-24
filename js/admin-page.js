@@ -297,27 +297,6 @@ function renderUsersTable() {
 }
 
 function renderOrdersTable() {
-  if (!elements.adminOrdersPanel) return;
-  const existingTable = document.getElementById("adminOrdersTable");
-  if (!existingTable) {
-    elements.adminOrdersPanel.querySelector(".admin-settings").innerHTML = `
-      <div class="table-wrap">
-        <table class="admin-table">
-          <thead>
-            <tr>
-              <th>Mã đơn</th>
-              <th>Khách hàng</th>
-              <th>Tổng tiền</th>
-              <th>Trạng thái</th>
-              <th>Ngày tạo</th>
-            </tr>
-          </thead>
-          <tbody id="adminOrdersTable"></tbody>
-        </table>
-      </div>
-    `;
-  }
-
   const table = document.getElementById("adminOrdersTable");
   if (!table) return;
 
@@ -345,7 +324,7 @@ function renderOrdersTable() {
           <td>${order.customer || "---"}</td>
           <td>${formatCurrency(order.total)}</td>
           <td>${statusLabel[order.status] || order.status || "---"}</td>
-          <td>${order.createdAt || "---"}</td>
+          <td>${order.created_at || order.createdAt || "---"}</td>
         </tr>
       `
     )
@@ -422,11 +401,15 @@ async function loadDashboardData() {
     }
 
     state.users = users;
-    state.orders = [
-      { code: "DH-0001", customer: "Khách hàng A", total: 45990000, status: "pending", createdAt: "2026-04-24" },
-      { code: "DH-0002", customer: "Khách hàng B", total: 32990000, status: "shipping", createdAt: "2026-04-23" },
-      { code: "DH-0003", customer: "Khách hàng C", total: 1290000, status: "completed", createdAt: "2026-04-22" },
-    ];
+    let orders = [];
+    try {
+      const ordersResponse = await apiFetch("/api/admin/orders");
+      orders = Array.isArray(ordersResponse.orders) ? ordersResponse.orders : [];
+    } catch (error) {
+      orders = [];
+    }
+
+    state.orders = orders;
 
     state.filteredProducts = [...state.products];
 

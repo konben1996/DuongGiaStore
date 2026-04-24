@@ -108,15 +108,27 @@
         throw new Error(data.message || "Đăng nhập thất bại");
       }
 
-      const storage = remember ? localStorage : sessionStorage;
-      storage.setItem("authToken", data.token);
-      storage.setItem("authUser", JSON.stringify(data.user));
+      localStorage.setItem("authToken", data.token);
+      localStorage.setItem("authUser", JSON.stringify(data.user));
+
+      if (remember) {
+        sessionStorage.setItem("authToken", data.token);
+        sessionStorage.setItem("authUser", JSON.stringify(data.user));
+      } else {
+        sessionStorage.removeItem("authToken");
+        sessionStorage.removeItem("authUser");
+      }
 
       hideLoginButton();
 
-      setStatus("Đăng nhập thành công. Đang chuyển về trang chủ...");
+      const nextUrl = data.user && data.user.role === "admin" ? "admin.html" : "index.html";
+      setStatus(
+        data.user && data.user.role === "admin"
+          ? "Đăng nhập thành công. Đang chuyển vào trang quản trị..."
+          : "Đăng nhập thành công. Đang chuyển về trang chủ..."
+      );
       window.setTimeout(() => {
-        window.location.href = "index.html";
+        window.location.href = nextUrl;
       }, 1200);
     } catch (error) {
       setStatus(error.message || "Không thể đăng nhập. Vui lòng thử lại.", true);

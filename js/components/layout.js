@@ -203,7 +203,14 @@
   `;
 
   function renderHeader(target = document.getElementById("siteHeader")) {
-    if (target) target.innerHTML = headerHTML;
+    if (!target) return;
+    const isAdminPage = document.body.classList.contains("admin-shell");
+    target.innerHTML = isAdminPage
+      ? headerHTML.replace(
+          /<nav class="navbar">[\s\S]*?<\/nav>/,
+          ""
+        )
+      : headerHTML;
   }
 
   function renderFooter(target = document.getElementById("siteFooter")) {
