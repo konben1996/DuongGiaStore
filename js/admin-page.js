@@ -43,6 +43,13 @@ const elements = {
   adminProductStatus: document.getElementById("adminProductStatus"),
   adminProductsTable: document.getElementById("adminProductsTable"),
   adminUsersTable: document.getElementById("adminUsersTable"),
+  adminUserModal: document.getElementById("adminUserModal"),
+  adminUserForm: document.getElementById("adminUserForm"),
+  adminUserName: document.getElementById("adminUserName"),
+  adminUserEmail: document.getElementById("adminUserEmail"),
+  adminUserRole: document.getElementById("adminUserRole"),
+  adminUserPhone: document.getElementById("adminUserPhone"),
+  adminUserStatus: document.getElementById("adminUserStatus"),
   adminOrderModal: document.getElementById("adminOrderModal"),
   adminOrderForm: document.getElementById("adminOrderForm"),
   adminOrderCode: document.getElementById("adminOrderCode"),
@@ -296,8 +303,8 @@ function renderUsersTable() {
           <td>${user.role || "user"}</td>
           <td>${user.phone || "---"}</td>
           <td>
-            <button type="button" class="btn btn--light" data-admin-action="toggle-user-role" data-id="${user.id}">
-              Đổi role
+            <button type="button" class="btn btn--light" data-admin-action="edit-user" data-id="${user.id}">
+              Sửa
             </button>
           </td>
         </tr>
@@ -527,6 +534,7 @@ async function loadDashboardData() {
 
 let editingProductId = null;
 let editingOrderId = null;
+let editingUserId = null;
 
 function openOrderForm(order = null) {
   editingOrderId = order ? order.id : null;
@@ -547,6 +555,24 @@ function openOrderForm(order = null) {
   }
 
   openModal(elements.adminOrderModal);
+}
+
+function openUserForm(user = null) {
+  editingUserId = user ? user.id : null;
+
+  if (elements.adminUserForm) {
+    elements.adminUserForm.reset();
+  }
+
+  if (elements.adminUserName) elements.adminUserName.value = user?.name || "";
+  if (elements.adminUserEmail) elements.adminUserEmail.value = user?.email || "";
+  if (elements.adminUserRole) elements.adminUserRole.value = user?.role || "user";
+  if (elements.adminUserPhone) elements.adminUserPhone.value = user?.phone || "";
+  if (elements.adminUserStatus) {
+    elements.adminUserStatus.textContent = user ? "Đang chỉnh sửa tài khoản." : "";
+  }
+
+  openModal(elements.adminUserModal);
 }
 
 function openProductForm(product = null) {
@@ -643,6 +669,39 @@ function bindEvents() {
     }
   });
 
+  elements.adminUserForm?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const payload = {
+      name: elements.adminUserName?.value.trim() || "",
+      email: elements.adminUserEmail?.value.trim() || "",
+      role: elements.adminUserRole?.value || "user",
+      phone: elements.adminUserPhone?.value.trim() || "",
+    };
+
+    try {
+      if (elements.adminUserStatus) {
+        elements.adminUserStatus.textContent = editingUserId ? "Đang cập nhật người dùng..." : "Đang tạo người dùng...";
+      }
+
+      await apiFetch(`/api/admin/users/${editingUserId}`, {
+        method: "PATCH",
+        body: JSON.stringify(payload),
+      });
+
+      if (elements.adminUserStatus) {
+        elements.adminUserStatus.textContent = "Lưu người dùng thành công.";
+      }
+
+      closeModal(elements.adminUserModal);
+      await loadDashboardData();
+    } catch (error) {
+      if (elements.adminUserStatus) {
+        elements.adminUserStatus.textContent = error.message || "Không thể lưu người dùng";
+      }
+    }
+  });
+
   elements.adminProductForm?.addEventListener("submit", async (event) => {
     event.preventDefault();
 
@@ -705,6 +764,10 @@ function bindEvents() {
     button.addEventListener("click", () => closeModal(elements.adminProductModal));
   });
 
+  document.querySelectorAll("[data-close-modal='adminUserModal']").forEach((button) => {
+    button.addEventListener("click", () => closeModal(elements.adminUserModal));
+  });
+
   document.querySelectorAll("[data-close-modal='adminOrderModal']").forEach((button) => {
     button.addEventListener("click", () => closeModal(elements.adminOrderModal));
   });
@@ -727,6 +790,13 @@ function bindEvents() {
       const order = state.orders.find((item) => String(item.id) === String(id));
       if (!order) return;
       openOrderForm(order);
+      return;
+    }
+
+    if (action === "edit-user") {
+      const user = state.users.find((item) => String(item.id) === String(id));
+      if (!user) return;
+      openUserForm(user);
       return;
     }
 
@@ -758,6 +828,7 @@ function bindEvents() {
   elements.globalBackdrop?.addEventListener("click", () => {
     closeModal(elements.adminProductModal);
     closeModal(elements.adminOrderModal);
+    closeModal(elements.adminUserModal);
   });
 }
 

@@ -775,21 +775,36 @@ app.patch('/api/admin/orders/:id', authMiddleware, requireAdmin, async (req, res
 
 app.patch('/api/admin/users/:id', authMiddleware, requireAdmin, async (req, res) => {
   const userId = Number(req.params.id);
-  const { name, phone, role } = req.body || {};
+  const { name, email, phone, role } = req.body || {};
 
   if (role && !['user', 'admin'].includes(role)) {
     return res.status(400).json({ message: 'Role không hợp lệ' });
   }
 
-  const dbCheck = await getDbOrFallbackRows('SELECT id FROM users WHERE id = ? LIMIT 1', [userId]);
+  if (email !== undefined && (typeof email !== 'string' || !email.trim())) {
+    return res.status(400).json({ message: 'Email không hợp lệ' });
+  }
+
+  const nextEmail = typeof email === 'string' ? email.trim() : undefined;
+  const nextName = typeof name === 'string' ? name.trim() : undefined;
+  const nextPhone = phone === undefined ? undefined : phone === null ? null : String(phone).trim();
+
+  const dbCheck = await getDbOrFallbackRows('SELECT id, email FROM users WHERE id = ? LIMIT 1', [userId]);
   if (dbCheck.ok) {
     if (dbCheck.rows.length === 0) {
       return res.status(404).json({ message: 'Không tìm thấy người dùng' });
     }
 
+    if (nextEmail && nextEmail.toLowerCase() !== dbCheck.rows[0].email.toLowerCase()) {
+      const duplicate = await getDbOrFallbackRows('SELECT id FROM users WHERE email = ? AND id <> ? LIMIT 1', [nextEmail, userId]);
+      if (duplicate.ok && duplicate.rows.length > 0) {
+        return res.status(409).json({ message: 'Email đã tồn tại' });
+      }
+    }
+
     await pool.query(
-      'UPDATE users SET name = COALESCE(?, name), phone = COALESCE(?, phone), role = COALESCE(?, role) WHERE id = ?',
-      [name || null, phone === undefined ? null : phone, role || null, userId]
+      'UPDATE users SET name = COALESCE(?, name), email = COALESCE(?, email), phone = COALESCE(?, phone), role = COALESCE(?, role) WHERE id = ?',
+      [nextName || null, nextEmail || null, nextPhone === undefined ? null : nextPhone, role || null, userId]
     );
 
     const updated = await pool.query(
